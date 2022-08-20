@@ -19,10 +19,17 @@ services:
         container_name: librarify-php
         build:
             context: ./docker/php-fpm
+        environment:
+            PHP_IDE_CONFIG: serverName=Docker
+            PHP_XDEBUG_ENABLED: 1
+            XDEBUG_CONFIG: remote_host=172.17.0.1 remote_port:9005 #For linux
+            # XDEBUG_CONFIG: remote_host=host.docker.internal remote_port:9005 #For macOS
         ports:
             - '9000:9000'
         volumes:
             - ./librarify/:/var/www/librarify
+            - ./docker/php-fpm/xdebug-linux.ini:/usr/local/etc/php/conf.d/xdebug.ini #For linux
+            - ./docker/php-fpm/xdebug-macos.ini:/usr/local/etc/php/conf.d/xdebug.ini #For macOS
         depends_on:
             - librarify-db-mysql
         networks:

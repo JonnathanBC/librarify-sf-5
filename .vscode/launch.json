@@ -1,0 +1,28 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+
+  "version": "0.2.0",
+  "configurations": [
+    {
+        "name": "librarify",
+        "type": "php",
+        "request": "launch",
+        "port": 9003,
+        "pathMappings": {
+            "/var/www/librarify": "${workspaceFolder}/librarify"
+        }
+    },
+    // {
+    //     Configurar siempre los .env cuando vayamos ha hacer cualquier conexion con XDEBUG para los puertos de diff servicios.
+    //     "name": "other services",
+    //     "type": "php",
+    //     "request": "launch",
+    //     "port": 9004,
+    //     "pathMappings": {
+    //         "/var/www/librarify": "${workspaceFolder}/otherService"
+    //     }
+    // }
+  ]
+}
