@@ -108,3 +108,41 @@ class LibraryController extends AbstractController
 }
 
 Queda más limpio y no es necesario el uso del constructor si no como vemos podemos usar la intyecciion de dependencias directo en la funcion del controlador. Este funcionamiento es a nivel solo de controladores, si usamos en otro lado esto pues deberiamos de usar los constructores como vemos en el primer ejm, revisar documentacion para mas información, cambia segun las versiones de symfony este tipo de cosas.
+
+
+!!! BASES DE DATOS !!!.- Symofny tiene un gestor de DB por execelencia vamos a llamarlo ORM llamado Doctrine, doctrine tiene como dis funciones :
+    1) Nos abstrae la conexión con la BD, es decir, nos trae una capa que nos permite conectarnos a BD sin tenernos que nososotros picar la típicas conslutas de mySQL
+
+    2)Funciona como un ORM lo cual nos permite mapear nuestras clases y objetos php con las tablas que tenmos en MySql y funciona correctamente.
+
+Instalación:
+    - composer require symfony/orm-pack
+    Esto nos es mas que una receta de flex la cula le decimos que nos traiga todas la librerias, componentes y bundle para trabajar con doctrine, y ademas nos ejecuta una serie de scripts que nos va a configurar una serie de archivos el cual mos servira mucho para trabajar Dcotrine.
+
+    Nos da en el archivo .env una linea de código muy importante que es lo que nos va a permitir conectarnos a la BD. La configuracion de db y cosas importantes como claves siempre las debemos generar dentro del .env.local siempre porque por defecto symfony esto no lo sube al repositorio
+
+También tiene un bundle super práctico llamamdo make bundle el cual nos va a permitir por comandos ejecutar nuestras migraciones, nuestras entidades sin necesidad de hacer manualmente una creando getters y setters si no que automaticamente las crea el con el nombre de cada campo, es una dep de desarrollo:
+Instalacion:
+    - composer require --dev symfony/maker-bundle
+    Entonces nosotros ya una vez teniendo la conexion a nuestra BD podemos lanzar el comando
+    bin/console make:entity nameEntity esto nos creara las entidades nos pedira los campos que nosotros queremos colocar dentro de esta entidad y asi se crear automatocamente la entidad con los capos que le pasemos sus getters y setters.
+
+    - Luego cuando estemos listos pues tenemos que crear las migraciones con el sig comando:
+        php bin/console make:migration
+        Esto creara un archivo dentro de la carpeta migrations donde tendrán las sentencias SQL para crear nuestra entidad y campos que le hayamos especificado.
+    -Luego debemos de ejeuctar la migracion con bin/console doctrine:migration:migrate (bin/console d:m:m)
+
+    como persistimos los datos, usando un Servicio de Doctrine llamado EntityManager, o cual nos va a permitir persistir entidades a BD lo debemos de usar como una inteccion de dependencias ejm:
+
+
+    public function createBook(Request $request, EntityManagerInterface $em)
+    {
+        $book = new Book();
+        $book->setTitle('Hacia rutas salvajes');
+
+        $em->persist($book);
+        $em->flush();
+    }
+}
+
+Tenemos que hacer como vemos dos pasos el persist y el flush, con el persist le decimos, tengo una entidad de php en este caso la clase Book, gestionalo, le decimos que el objeto lo controle el, le decimos a Dcotrine quye tenemos un objeto de la clase libro, ya con el flush lo salvamos en el db
