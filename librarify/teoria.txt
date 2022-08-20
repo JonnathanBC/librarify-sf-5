@@ -1,0 +1,110 @@
+!!! Rutas y controladores !!!.- Symfony nos recomiendo usar las anotaciones cuando nosotros queremos generar rutas desde un controladore, por lo que nos ofrece un bundle para poder emplear dichas anotacinoes:
+Instalacion:
+    - composer require annotations
+    Lo que hace esto instalar el bundle y ejecuta unas recetas las cuales nos configuran los archivos necesarios para su correcto uso de este paquete, automagicamente symfony lo coloca dentro las configuraciones.
+
+Uso:
+    - Podemos usarlo de la sig manera dentro de nuestros Controllers:
+<?php
+
+namespace App\Controller;
+
+use Psr\Log\LoggerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Annotation\Route;
+
+class LibraryController extends AbstractController
+{
+    private $logger;
+
+    public function __construct(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
+    }
+
+    /**
+     * @Route("/library/list", name="library_list")
+     */
+    public function list(Request $request)
+    {
+        $title = $request->get('title', 'Alegría');
+        $this->logger->info('List action called');
+        $response = new JsonResponse();
+        $response->setData([
+            'success' => true,
+            'data' => [
+                [
+                    'id' => 1,
+                    'title' => 'Hacia rutas salvajes'
+                ],
+                [
+                    'id' => 2,
+                    'title' => 'El nombre del viento'
+                ],
+                [
+                    'id' => 2,
+                    'title' => $title
+                ]
+            ]
+        ]);
+        return $response;
+    }
+}
+
+Colocando una anotacion arriba de la clase donde queremos que sea una ruta, es recomendable darle un nombre a nuestra ruta para que sea mas facil acceder a ella mediante el nombre, También podemos ver un poco de Servicios que estamos inyectando directo en la funcion que sería el Request que lo que nos permite es tener toda la infoemacion de la request o peticion que hacemos en este ejem estamos pasanod por query un parametro llamado title donde capturamos en la ruta de nuestro navegador y el libre 3 tendra ese nombre el que le pasemos por query, tambien podemos darle un valor por defcto en el caso que no exita ese valor en la query pues tomará ese valor por defecto en nuestro ejm es fortunata, los controladores de symfony siempre pero siempre deben de retornar una respuesta para ello podemos usar el Objeto Response o JsonResponse como vemos en el ejm de arriba.
+Los controladores pueden recibir los Servicios que son basicamente clases que hacen cosas y tpdo estos segicios estna dentro de una cosa que se llama containe, y asi podemos nosotros usar los servicios atraves de la inyeccion de dependencias. con este comando: bin/console debug:container nos dan una lista de los servicios que tenemos en nuestra app.
+
+Como vemos en el ejm de arriba es una forma de inyectar los Servicios mediante su contructor, pero tambien gracias a una configuracion en el archivo config/services.yml podemos acceder a estos servicios s¿directo en la funcion misma donde lo vayamos a usar sin necesidad de utilizr el controlador ejm:
+
+    services.yml => cabe recalcar en las versiones nuevas de symfony esto no viene configurado ya porque ya lo hace por defecto, pero en otras versiones en necesario colocar esto cro que de symfony 5.4 para abajo.
+
+    ...resto of code
+    App\Controller\:
+        resource: '../src/Controller'
+        tags: ['controller.service_arguments']
+
+USO:
+    <?php
+
+namespace App\Controller;
+
+use Psr\Log\LoggerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Annotation\Route;
+
+class LibraryController extends AbstractController
+{
+    /**
+     * @Route("/library/list", name="library_list")
+     */
+    public function list(Request $request, LoggerInterface $logger)
+    {
+        $title = $request->get('title', 'Alegría');
+        $logger->info('List action called inside function');
+        $response = new JsonResponse();
+        $response->setData([
+            'success' => true,
+            'data' => [
+                [
+                    'id' => 1,
+                    'title' => 'Hacia rutas salvajes'
+                ],
+                [
+                    'id' => 2,
+                    'title' => 'El nombre del viento'
+                ],
+                [
+                    'id' => 2,
+                    'title' => $title
+                ]
+            ]
+        ]);
+        return $response;
+    }
+}
+
+Queda más limpio y no es necesario el uso del constructor si no como vemos podemos usar la intyecciion de dependencias directo en la funcion del controlador. Este funcionamiento es a nivel solo de controladores, si usamos en otro lado esto pues deberiamos de usar los constructores como vemos en el primer ejm, revisar documentacion para mas información, cambia segun las versiones de symfony este tipo de cosas.

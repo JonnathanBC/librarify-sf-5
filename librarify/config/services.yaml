@@ -18,6 +18,8 @@ services:
         exclude:
             - '../src/DependencyInjection/'
             - '../src/Entity/'
+            - '../src/Migrations/'
+            - '../src/Test/'
             - '../src/Kernel.php'
 
     # add more service definitions when explicit configuration is needed
