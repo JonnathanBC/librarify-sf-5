@@ -20,12 +20,10 @@ services:
         build:
             context: ./docker/php-fpm
         environment:
-            PHP_IDE_CONFIG: serverName=Docker
-            PHP_XDEBUG_ENABLED: 1
-            XDEBUG_CONFIG: remote_host=172.17.0.1 remote_port:9005 #For linux
-            # XDEBUG_CONFIG: remote_host=host.docker.internal remote_port:9005 #For macOS
-        ports:
-            - '9000:9000'
+            XDEBUG_CLIENT_HOST: 172.17.0.1
+            # XDEBUG_CLIENT_HOST: host.docker.internal # only use macOS
+            XDEBUG_CLIENT_PORT: 9005
+            # PHP_IDE_CONFIG: serverName=librarify-php #Only use for PHPSTORM
         volumes:
             - ./librarify/:/var/www/librarify
             - ./docker/php-fpm/xdebug-linux.ini:/usr/local/etc/php/conf.d/xdebug.ini #For linux
