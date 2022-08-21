@@ -5,7 +5,6 @@ namespace App\Controller;
 use App\Entity\Book;
 use App\Repository\BookRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use PhpParser\Node\Stmt\Return_;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -17,9 +16,10 @@ class LibraryController extends AbstractController
     /**
      * @Route("/books", name="books_get")
      */
-    public function list(BookRepository $bookRepository)
+    public function list(BookRepository $bookRepository, LoggerInterface $logger)
     {
         $books = $bookRepository->findAll();
+        $logger->info('I passed by here');
         $booksAsArray = [];
         foreach ($books as $book) {
             $booksAsArray[] = [

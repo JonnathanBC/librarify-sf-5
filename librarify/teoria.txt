@@ -139,10 +139,75 @@ Instalacion:
     {
         $book = new Book();
         $book->setTitle('Hacia rutas salvajes');
-
         $em->persist($book);
         $em->flush();
     }
 }
 
-Tenemos que hacer como vemos dos pasos el persist y el flush, con el persist le decimos, tengo una entidad de php en este caso la clase Book, gestionalo, le decimos que el objeto lo controle el, le decimos a Dcotrine quye tenemos un objeto de la clase libro, ya con el flush lo salvamos en el db
+Tenemos que hacer como vemos dos pasos el persist y el flush, con el persist le decimos, tengo una entidad de php en este caso la clase Book, gestionalo, le decimos que el objeto lo controle el, le decimos a Dcotrine quye tenemos un objeto de la clase libro, ya con el flush lo salvamos en el db.
+
+!!! FOST REST BUNDLE !!!.- Es un bundle como Api PLatform que nos permite montar una api.
+Instalación
+    -composer require friendsofsymfony/rest-bundle.
+    
+    -Pero esto nos da un error porque necesita esto un serealizer, que lo que hace es como hiciumos a mano recuperar el librro y convertirlo a json pues este lo hace automaticamente por nosotros. asi que tenemos dos opciones uno de terceros y el propio que symfony saco llamado sereaizer lo vamos a instalar:
+        - composer require symfony/serializer-pack
+    Una vez instalado el serealizer debemos de agregar ls sig configuracion en el 
+    config/packages/framework.yaml:
+        ...code
+
+        serializer:
+            enabled: true
+            mapping:
+                paths: ['%Kernel.project_dir%/config/serializer']
+    Con el mapping le decimos como queremos mapear las propiedades al formato que nosotros queremos, por ejm al id de un entidad le decimos que le queremos llamar casa por ejm etc. como esa carpeta serializer no existe pues la tenemos que crear dentro de config
+
+    Dentro de esta carpeta creamos el archivo yaml de la entidad que estamos queriendo mapear ejm:
+    config/serializer/Entity/Book.yaml
+
+        App\Entity\Book:
+    attributes:
+        id: 
+            groups: ['book']
+        title:
+            groups: ['book']
+    Basicamente lo que hace los serializer es definir grupos de serealizacion de modo que en función de cual especiquemos podemos definir que propiedades del objeto aparecen o no.
+
+Ahora temos que definir el Fost Rest Bundle:
+    en el archivo routes.yaml agregamos lo sig:
+        api:
+            resource: ../../src/Controller/Api
+            type: annotation
+            prefix: /api
+    Con esto estamos habilitando las rutas con el prefijo api.
+
+Luego debemo de configurar el archivo fos_rest.yml (dentro esta la conf ya pegada).
+Luego debemos de instalar un Validator pata que funione nuestro fostRest, el componente Validaotr nos permite validar entidades mas bien objetos en función de unas reglas que nosotros definamos. por ejm queremos hacer una llamada en post pues podemos validar los datos que estamos enviando:
+
+Instalacion:
+    - composer require symfony/validator twig doctrine/annotations
+    El Validator depende de las annotations de doctrine por eso lo estamos instalado qui tambien y este doctrine depnde de Twig entonces por eso estamos instalando los 3.
+
+Una vez tenemos todo esto podemos nosotros crear los controladores dentro de nuestra carpeta api que especificamos en la configuracion de la ruta oara qiue este tenga el prefijo /api a todas nuestras rutas ejm:
+
+    <?php
+
+namespace App\Controller\Api;
+
+use App\Repository\BookRepository;
+use FOS\RestBundle\Controller\AbstractFOSRestController;
+use FOS\RestBundle\Controller\Annotations as Rest;
+use Symfony\Component\HttpFoundation\Request;
+
+class BooksController extends AbstractFOSRestController
+{
+    /**
+     * @Rest\Get(path="/books")
+     * @Rest\View(serializerGroups={"book"}, serializerEnableMaxDepthChecks=true)
+     */
+    public function getActions(Request $request, BookRepository $bookRepository)
+    {
+        return $bookRepository->findAll();
+    }
+}
+ Las anotaciones deben ser de FostRestBundle
