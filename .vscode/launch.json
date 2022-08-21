@@ -9,20 +9,10 @@
         "name": "librarify",
         "type": "php",
         "request": "launch",
-        "port": 9003,
+        "port": 9005,
         "pathMappings": {
             "/var/www/librarify": "${workspaceFolder}/librarify"
         }
-    },
-    // {
-    //     Configurar siempre los .env cuando vayamos ha hacer cualquier conexion con XDEBUG para los puertos de diff servicios.
-    //     "name": "other services",
-    //     "type": "php",
-    //     "request": "launch",
-    //     "port": 9004,
-    //     "pathMappings": {
-    //         "/var/www/librarify": "${workspaceFolder}/otherService"
-    //     }
-    // }
+    }
   ]
 }

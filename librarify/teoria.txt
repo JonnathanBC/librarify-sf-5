@@ -211,3 +211,77 @@ class BooksController extends AbstractFOSRestController
     }
 }
  Las anotaciones deben ser de FostRestBundle
+
+!!! FORMULARIOS !!!.- Para esto debemos de instalar el componente formulario de symfony:
+    - composer require symfony/form
+    Este nos permite declarar formularios y que procesaremos en nuestros controladores, dentro de src ccreamois un carpeta llamada Form y por convencion una carpeta llamada Type¿ y dentro creamos los files necesarios para esto de los Forms.
+    src/Form/Type/BookFormType.php
+
+    <?php
+
+    namespace App\Form\Type;
+
+    use App\Entity\Book;
+    use Symfony\Component\Form\AbstractType;
+    use Symfony\Component\Form\Extension\Core\Type\TextType;
+    use Symfony\Component\Form\FormBuilderInterface;
+    use Symfony\Component\OptionsResolver\OptionsResolver;
+
+    class BookFormType extends AbstractType
+    {
+        public function buildForm(FormBuilderInterface $builder, array $options): void
+        {
+            $builder->add('title', TextType::class);
+        }
+
+        public function configureOptions(OptionsResolver $resolver)
+        {
+            $resolver->setDefaults([
+                'data_class' => Book::class
+            ]);
+        }
+        
+    }
+Aqui lo que estamos haciendo en la primera funcione es inyectrar FormBuilderInterface $builder lo que nos da este servicio es una serie de metodo los cuales podemos nosotros usarlos en este caso estamos usando add que lo que hace es aladir un campo title y como segundo parametro recibe el tipo de campo en este caso TextType, luego en la 2da funcion  es inyectarnos el OptionsResolver, esto nos sirve para nosotros especidficarle a que entidad esta haciendo referencia.
+
+Luego vamos a usarlo dentro de nuestro controller:
+
+
+Aunque aveces falla esto por lo cual debemos de pasarle en el body un nombre porque symfony guarada los formularios que creamos con un nombre ejm:
+
+Esto le pasamos en el body de la peticion:;
+    "book_form":
+        {
+            "title": "El pozo de la ascención"
+        }
+Si queremos evitar esto, para no tener que estar colocnado cada rato el nombre del form, dentro de nuestro BookTypeForm en este caso vamos a añadir dos metodos ejm:
+
+    ...rest of code
+    //cuando trabajamos con Twig
+    public function getBlockPrefix()
+    {
+        return '';
+    }
+
+    public function getName()
+    {
+        return '';
+    }
+De modo que asi ya no debemos especificar el nombre del form en la request.
+Ahora vamos a colocar constrains a diff campos de nuestra app podemos usar yaml o annotations.
+
+Con Annotations:
+use Symfony\Component\Validator\Constraints as Assert;
+
+    /**
+     * @Assert\NotBlank
+     */
+    protected $firstName;
+
+    Esto dentro del controller y arriba del campos que queremos que nos sea blanco o tenga alguna constraints:
+
+Mediante yaml: tenemos que crear una carpeta dentro de config llamado validator y dentro un file que hacemos por convencion tenga el mismo nombre de la entidad que vamos a agregar este tipo de constraint
+
+config/validator/Book.yaml
+
+    
