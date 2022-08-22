@@ -284,4 +284,178 @@ Mediante yaml: tenemos que crear una carpeta dentro de config llamado validator 
 
 config/validator/Book.yaml
 
-    
+!!! DTO's y carga de imagenes !!!.- Cuando cargamos los imagenes debemos de siempre guradar dentro del campo solo el nombre del archivo nombre del fichero.
+Podemos enviarlo de dos formas:
+    1) Por formulario multipart donde la imagen aparece como un archivo adjunto.
+    2) Enviar la imagen como si fuera un fichero en base 64 codificado. 
+Para no crear campos automagicos como en este caso un campo base64Image que necesitamos para la imagen, no debemos de adaptar el DB a la Entidad si no la entidad al DB, por lo cual vamos a usar los
+Data Transfer Objects (DTO's), lo cual representa los objetos que se envian a los formularios sin necesidad de tener que modificar nuestras entidades. Una convencion de symfony es crear una carpeta Model dentro de la carpeta Form que creamos para esto y dentro crear el archivo con lo sig:
+    1) crear el archivo:
+        src/Form/Model/BookDto.php
+            <?php
+
+            namespace App\Form\Model;
+
+            class BookDto
+            {
+                public $title;
+                public $base64Image;
+            }
+
+    2)En nuestrio BookFormType lo que debemos de hacer en la funcion configureOptions cambiarle el data_class => por el Dto que acabamos de crear.
+
+    ...rest of code
+        public function configureOptions(OptionsResolver $resolver)
+        {
+            $resolver->setDefaults([
+                'data_class' => Book::class //antes
+                'data_class' => BookDto::class //ahroa apunta al Dto.
+            ]);
+        }
+
+    3) Cmbiar tambien la validacion que haciamos antes que apunte tambien a este Dto
+        //antes
+        App\Entity\Book:
+        properties:
+        
+        //Ahora apunta al Dto. como convencio podemos cambiar el nombre del archivo yaml por BookDto.yaml
+        App\Form\Model\BookDto:
+        properties:
+
+   4) Pero los dto que estamos creando no son servicios por lo cual debemos de configurar el archivo services.yaml para estos no lo tomen como servicios, porque no solo son objetos que vamos a usar para tranajar con los formularios.
+    config/services.yaml
+        .. rest of code
+        - '../src/Form/Model'
+            añadimos esto pata que no lo tome como servicio dentro de exclude
+            App\:
+                resource: '../src/'
+                exclude:
+
+    5) Debemos de cambiar el controller, lo que queremos hacer aqui es, que todo lo que se mande por el Dto instanciandolo le tenemos que colocar al la entidad Book en este caso, es decir el dto recibe el title y la imagen entonces como estamos apuntando todo al Dto, lo que tenga el Dto le cargamos a la entidad libro xejm:
+        /**
+         * @Rest\Post(path="/books")
+         * @Rest\View(serializerGroups={"book"}, serializerEnableMaxDepthChecks=true)
+        */
+        public function postActions(Request $request, EntityManagerInterface $em)
+        {
+            $bookDto = new BookDto();
+            $form = $this->createForm(BookFormType::class, $bookDto);
+            $form->handleRequest($request);
+            if ($form->isSubmitted() && $form->isValid()) {
+                $book = new Book();
+                $book->setTitle($bookDto->title);
+                $em->persist($book);
+                $em->flush();
+                return $book;
+            }
+            return $form;
+        }
+    }
+
+  CARGA DE IMAGENES.- Lo vamos ha hacer con el bundle flysystem-bundle, nos permite subir qechivos a nivel local o cdn como s3:
+  Instalacion:
+    - composer require league/flysystem-bundle
+    Esto nos configurara un archivo dentro de la carpeta packages un archivo llamado flysystem.yaml debemos de configurar de la siguiente manera:
+        flysystem:
+            storages:
+                default.storage:
+                    adapter: 'local'
+                    # adapter: 's3'
+                    options:
+                        directory: '%kernel.project_dir%/public/storage/default'
+        Lo único que cambiamos aqui en el directory colocamos public en ves de var para que se puedan servir desde ek public que es donde se muestran las imagenes.
+
+    Luego debemos de hacer la inyeccion de dependencias en donde vayamos a usar el servicio que seria en el BooksController ejm:
+        
+        Es importante que la variable $defaultStorage tenga el mismo nombre se llame igual en donde se creao el archivo flysystem.yaml
+
+        flysystem:
+            storages:
+            default.storage: => se tiene que llamar igual a esta variable
+                adapter: 'local'
+                # adapter: 's3'
+                options:
+                    directory: '%kernel.project_dir%/public/storage/default'
+
+    Luego en nuestro controlador debemos de hacer 4 tranformaciones para poder cargar el archivo el nombre mejor dicho x ejm:
+
+    /**
+     * @Rest\Post(path="/books")
+     * @Rest\View(serializerGroups={"book"}, serializerEnableMaxDepthChecks=true)
+     */
+    public function postActions(
+        Request $request,
+        EntityManagerInterface $em,
+        FilesystemOperator $defaultStorage
+    ) {
+        $bookDto = new BookDto();
+        $form = $this->createForm(BookFormType::class, $bookDto);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            //tranformaciones
+            $extension = explode('/', mime_content_type($bookDto->base64Image))[1]; => con esto estamos sacando la extension, del bookDto cogemos el campo base64Image en este caso o el campo donde estemos yendo a alamacenar el nombre de la imagen.
+
+            $data = explode(',', $bookDto->base64Image); => aqui estamos dividiendo el contenido del campo base64Image en dos partes porque las url de bas64 tiene una separacion por coma, siendo la primera parte la informacion del fichero y la segunda parte la imagen codificada en bse64 tal cual.
+
+            $fileName = sprintf('%s.%s', uniqid('book_', true), $extension); => Aqui estamos generando un nombre de fichero, mediante la funcion uniqid de php metiendo un prefijo book_, con el true le estamos obligando que tenga 23 caracteres para que no nos colicionen los nombres de los fichero como segundo parametro le pasamos la $extension, osea la extension que hayamos calculado de la imagen a subir
+
+            $defaultStorage->write($fileName, base64_decode($data[1])); => Todo esto porque el $defautStorage en su funcion write recibe dos argumentos, el primero el path en el que queremos escribir y como segundo parametro los contenidos, osea, la imagen decodificada, es decir el segundo pedazo de la imagen explotada por coma(,), como dijimos en data estamos diviendo la primera parte la info del file y la segunda la imagen decodificada.
+
+            //Persistencia
+            $book = new Book();
+            $book->setTitle($bookDto->title);
+            $book->setImage($fileName);
+            $em->persist($book);
+            $em->flush();
+            return $book;
+        }
+        return $form;
+    }
+
+Pero vemos que tenemos un problema, el cúal nosotros estamos devolviendo el nombre de la imagen solo, lo que tendríamos que hacer es cuando hacemos la peticion de nuestra api, debemos de devolver el valor de la imagen pero la url completa a ese servicio par poder acceder desde fuera x ejm devolvemos name_image.jpeg y queremos que devuelva esto => http://nube.com/name_image.jpeg.
+Podemos lograrlo con el componente Serializer de symfony, el cúal nos permite engancharnos al proceso de serialización para realizr las modificaciones que necesitemos paso:
+    1) Creamos una carpeta llamada Serializer en nuestra src y dentro un archivo llamado BookNormalizer.php, un BookNormalizer se ennarga de hacer la basicamente de hacer la transformacion de Entidad a json ejm:
+    src/Serializer/BookSerializer.php
+
+    <?php
+
+        namespace App\Serializer;
+
+        use App\Entity\Book;
+        use Symfony\Component\HttpFoundation\UrlHelper;
+        use Symfony\Component\Serializer\Normalizer\ContextAwareNormalizerInterface;
+        use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+
+        class BookNormalizer implements ContextAwareNormalizerInterface
+        {
+            private $normalizer;
+            private $urlHelper;
+
+            public function __construct(
+                ObjectNormalizer $normalizer,
+                UrlHelper $urlHelper
+            ) {
+                $this->normalizer = $normalizer;
+                $this->urlHelper = $urlHelper;
+            }
+
+            public function normalize($book, string $format = null, array $context = [])
+            {
+                $data = $this->normalizer->normalize($book, $format, $context);
+
+                if(!empty($book->getImage())) {
+                    $data['image'] = $this->urlHelper->getAbsoluteUrl('/storage/default/' . $book->getImage());
+                }
+
+                return $data;
+            }
+
+            public function supportsNormalization($data, string $format = null, array $context = [])
+            {
+                return $data instanceof Book;
+            }
+        }
+    Este normalizador nos pide que implementoemos dos funciones, la normalize que es donde nosotros tenemos y podemos modificar los que queremos como en este caso estamos pasando un complemento donde a la imagen le añadimos un path absoluto para poder acceder a la imagen.
+    Y la segundo funcion supportsNormalization que lo que tenemos que hacer y lo mas importabnte es pasarle en el retunr el nombre de la entidad que va a soportar esto en este caso Book
+    return $data instanceof Book; asi symfony sabra a que entidad hace referencia y los datos que tiene que cambiar.
+

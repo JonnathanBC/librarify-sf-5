@@ -21,6 +21,7 @@ services:
             - '../migrations/'
             - '../src/Test/'
             - '../src/Kernel.php'
+            - '../src/Form/Model'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
