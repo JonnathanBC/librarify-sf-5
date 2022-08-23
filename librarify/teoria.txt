@@ -459,3 +459,42 @@ Podemos lograrlo con el componente Serializer de symfony, el cúal nos permite e
     Y la segundo funcion supportsNormalization que lo que tenemos que hacer y lo mas importabnte es pasarle en el retunr el nombre de la entidad que va a soportar esto en este caso Book
     return $data instanceof Book; asi symfony sabra a que entidad hace referencia y los datos que tiene que cambiar.
 
+!!! PHPUnit !!!.- Es una herramineta para poder realixzar test, lo que nos ayuda basicamdnte es ha comprobar que nuestros servicios apesar que por el camino lo vayamos modificando pues este nos devuelva siempre lo mismo que hemos implementado. Nos permite declara test unitarios y test funcionales, nos permite ejecutar por linea de comandos.
+Instalación:
+    - composer require --dev symfony/phpunit-bridge
+    Una vez instalado esto nos pedira que lancemos el sig comando tambien para que nos traiga la libreria phpunit en sí. php bin/phpunit
+
+Para hacer test de Web como el sig ejem debemos de instalar tambien otro paquete por que si no nos da un error ejm:
+    composer require --dev symfony/browser-kit symfony/css-selector
+    tests/Controller/Api
+    <?php
+
+    namespace App\Tests\Controller;
+
+    use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
+
+    class BookControllerTest extends WebTestCase
+    {
+        public function testCreateBook()
+        {
+            $client = static::createClient();
+
+            $client->request('GET', '/api/books');
+
+            $this->assertEquals(400, $client->getResponse()->getStatusCode());
+        }
+    }
+
+Para nosotro poder hacer test de enpoints, lo recomendable y necesesario para que nos nos falle los test es creasr un db de prueba, symfony nos permite en el package dentro de config generr diff tipos de configuraciones dependiendo el entorno en el que estemos por ejm, aqui estamos creando nosotros un db sqlite donde le estamos pasando los datos que tenemos en nuestro db y para las pruebas de test x ejm:
+    - config/packages/test/doctrine.yaml
+    doctrine:
+    dbal:
+        driver: pdo_sqlite
+        path: "%kernel.cache_dir%/test.db"
+        url: null
+
+    - Luego debemos de lanzar el sig comando:
+        bin/console doctrine:database:create --env=test
+
+    - Luego lanzar las migraciones contra esta db de prueba :
+        bin/console doctrine:schema:update --env=test --force
