@@ -26,7 +26,8 @@ class BookFormType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'data_class' => BookDto::class
+            'data_class' => BookDto::class,
+            'csrf_protection' => false
         ]);
     }
 

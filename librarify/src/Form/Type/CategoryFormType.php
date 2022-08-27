@@ -20,7 +20,8 @@ class CategoryFormType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults([
-            'data_class' => CategoryDto::class
+            'data_class' => CategoryDto::class,
+            'csrf_protection' => false
         ]);
     }
 
