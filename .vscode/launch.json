@@ -1,14 +1,14 @@
 {
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "name": "librarify",
-      "type": "php",
-      "request": "launch",
-      "port": 9005,
-      "pathMappings": {
-          "/var/www/librarify": "${workspaceFolder}/librarify"
-      }
-    }
-  ]
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "librarify",
+			"type": "php",
+			"request": "launch",
+			"port": 9005,
+			"pathMappings": {
+					"/var/www/librarify": "${workspaceFolder}/librarify"
+			}
+		}
+	]
 }

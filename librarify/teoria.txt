@@ -498,3 +498,34 @@ Para nosotro poder hacer test de enpoints, lo recomendable y necesesario para qu
 
     - Luego lanzar las migraciones contra esta db de prueba :
         bin/console doctrine:schema:update --env=test --force
+
+!!! Authentication y Security Bundle !!!.- El security nos permite meter seguridad para proteccion, de modo que cuando subamos esta api a un dominio nos nos consuman de todo lado.
+Vamos a trabajar con los tokens de cabecera. Debemos de crear nosotros una carpeta Security donde vamos a emepzar a meter los archivos dentro de ahí para el manejor de la seguirdad.
+
+Installation:
+    - composer require symfony/security-bundle
+    Esto ejecuta algunas recetas.
+Al instalar esto cuando nosotros queremos por ejm hacer algun tipo de prueba en los fomrualrios para creación pues no dará un error => "The CSRF token is invalid. Please try to resubmit the form.", esto porque cuando nosotros instalamos este security-bundle este dentro de algunos paquetes que nesitan instalarse se trae el security/csrf que lo que hace es proteger todos los formularios atarvés del token CSRF que basicamente añade como un control de expiración a los forms para que no se puedan submitear después de un cierto tiempo y que los formularios que no tengan ese token por supuesto no sean válidos.
+En nustro caso no tenemos una forma de validar este token de una manera sencilla, por lo que vamos a desabilitarlo en nuestros FormType que creamos ses en libro que en Categorias. ejm:
+    añadiendo dentro del resolver el crsf_protection => funcionales
+    ... rest of code
+     $resolver->setDefaults([
+            'data_class' => CategoryDto::class,
+            'csrf_protection' =>  false
+        ]);
+    }
+Si queremos que ningun formulario de manera global no contenga este tipo de token csrf lo podemos desablitar a nivel de framework x ejm: 
+    config/packages/framework.yaml
+        framework:
+            secret: '%env(APP_SECRET)%'
+            csrf_protection: true
+    Colocando ese esta opción:  => csrf_protection: true por defecto viene comentada.
+
+Vamos a usar el modelo de GuardAuthentication (docs => https://symfony.com/doc/5.4/security/custom_authenticator.html)
+
+Pero symfony nos pide que tengamos un clase usuario aunque no este perisistida en DB, podemos crear una entity con nustro maker-bundle por ejm:
+    - bin/console make:user
+    - Este nos crea una "entity User" dentro de La carpeta Security, no nos crea en entity porque hemos decidido no persistir.
+    -Nos crea tambien un UserProvider dentro de la misma carpeta que va ha ser el encargado de recuperar la infor del user.
+    - Y actualiza el security.yaml, este actualiza y define un provider asociado a la calse que se a creado UserProvider en este caso a App\Security\UserProvider.
+    Luego siguiendo la documentacion, una vez tenemos configurado todo esto, debemos de nuestra clase Autenticator debemos de activar en nuestro archivo security.yaml en versinoes actuales esto ya viene automaticamente listo obviamnete como la documentacion dice nuestra clase user debe de extender de  PasswordAuthenticatedUserInterface para que funciones ya que este  PasswordAuthenticatedUserInterface ya viene configurado auto en el security.yaml
