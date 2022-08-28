@@ -16,11 +16,13 @@ use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPasspor
 
 class ApiKeyAuthenticator extends AbstractAuthenticator
 {
-    /**
-     * Called on every request to decide if this authenticator should be
-     * used for the request. Returning `false` will cause this authenticator
-     * to be skipped.
-     */
+   
+    private $appApiToken;
+
+    public function __construct(string $appApiToken) {
+        $this->appApiToken = $appApiToken;
+    }
+
     public function supports(Request $request): ?bool
     {
         return $request->headers->has('X-API-TOKEN');
@@ -30,7 +32,7 @@ class ApiKeyAuthenticator extends AbstractAuthenticator
     {
         $apiToken = $request->headers->get('X-API-TOKEN');
 
-        if (self::TOKEN !== $apiToken) {
+        if ($this->appApiToken !== $apiToken) {
             throw new CustomUserMessageAuthenticationException('API Token incorrect');
         }
         

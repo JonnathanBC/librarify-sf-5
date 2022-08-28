@@ -529,3 +529,37 @@ Pero symfony nos pide que tengamos un clase usuario aunque no este perisistida e
     -Nos crea tambien un UserProvider dentro de la misma carpeta que va ha ser el encargado de recuperar la infor del user.
     - Y actualiza el security.yaml, este actualiza y define un provider asociado a la calse que se a creado UserProvider en este caso a App\Security\UserProvider.
     Luego siguiendo la documentacion, una vez tenemos configurado todo esto, debemos de nuestra clase Autenticator debemos de activar en nuestro archivo security.yaml en versinoes actuales esto ya viene automaticamente listo obviamnete como la documentacion dice nuestra clase user debe de extender de  PasswordAuthenticatedUserInterface para que funciones ya que este  PasswordAuthenticatedUserInterface ya viene configurado auto en el security.yaml
+
+Lectura de parametros a servicios.- En este ejm vamos a leer la variable de entorno que le colocamos con nuestro apiToken para la autenticación:
+Pasos:
+    1)Crear la variable de entorno siempre trabajamos en el env.local ya que esete no se comitea, creamos la varible en el .env como string vacia, luego en el .env.local la llenamos.
+
+    2)En el services.yaml debemos en la sección parameters agregar esta nueva variable con un nombre y que puedo leer la variable de entorno:
+        parameters:
+            app.api_token: '%env(resolve:APP_API_TOKEN)%'
+        El nombre es app.api_token y esta leyendo la variable del APP_API_TOKEN.
+
+    3)En el mismo archivo debemos de indicarle a que servicio debemos de agregar esta variable cuando queremos inyectar ya que symfony puede hacer la inyeccion de dependencias pero si le inyectamos un parametro puro y duro el no lo sabe dentro de services:
+        services:
+            ... rest of code
+
+            App\Security\ApiKeyAuthenticator:
+                arguments:
+                    $appApiToken: '%app.api_token%'
+    Le pasamos igual un nombre como variable php y el valor, que lo que hace es leer la variable declarada en los parameters, siempre si queremos leer variable de entorno debemos de colocarle entro comiilas y simbolos de porcentaje.
+
+   4)Ya podemos usarlo en nuestro Servicio este caso ApiKeyAuthenticator:
+    - Le añadimos al constructor la variable global:
+        class ApiKeyAuthenticator extends AbstractAuthenticator
+        {
+            private $appApiToken;
+
+            public function __construct(string $appApiToken) {
+                $this->appApiToken = $appApiToken;
+        }
+
+    -Accedemos endonde la vayamos a usar: atarves del this porque esta en nuestro constructor.
+        if ($this->appApiToken !== $apiToken) {
+            throw new CustomUserMessageAuthenticationException('API Token incorrect');
+        }
+
