@@ -563,3 +563,92 @@ Pasos:
             throw new CustomUserMessageAuthenticationException('API Token incorrect');
         }
 
+!!! PHP stan !!!.-
+Nota.- podeos actualizar symfony, dentro del composer.json en la seccion "extra", podemos actualizar a cualquier version le colocamos:
+     "extra": {
+        "symfony": {
+            "allow-contrib": false,
+            "require": "5.4.*" => here
+        }
+    },
+Luego podemos lanzar el siguiente comando para que actualce las dependencias de forma automatica:
+    composer update symfony/* --with-dependecies
+    Si por a o b razon da error podemos modificar a mano el composer.json
+
+Instalacióin: Easy Code standar, que es mas un analizador de código que nos va a permitir verificar los standares habituales de programación en php
+    - composer require symplify/easy-coding-standard --dev
+    Este nos permite trabajar con el php_codeSniffer o PHP-CS-FIXER, esta es la mas habitual usar PHP-CS-FIXER.
+
+    -Segun la documentacion debemos de crear un archivin en la raíz del proyecto llamado ecs.php con el contenido colocado ahí que sirve mucho, en la documentacion esta otro archivo con otro tipo de config básica en este caso la colocamos mas standard que sirve en muchos de los casos, luego para poder ejecutar debemos lanzar los sig comandos:
+    Aunque podemos nosotros lanzar vendor/bin/ecs init este me crea un archivo ecs.php ya configuradp un par de cosas y es mejor hacer así entonces una vez instalado lanxamos los sig comandos:
+        - vendor/bin/ecs init => me crea un file ecs.php.
+        - vendor/bin/ecs check --ansi --no-interaction => esto lee el archivo y lo ejecuta y nos muestra en consola los errores que tenemos.
+
+        - vendor/bin/ecs check --ansi --no-interaction --fix hace lo mismo que el anterior si no que en este caso si puede lo fixea el mismo.
+    Pero no es lo mas optimo tarabajar asi, si no hacer uso de los scripts que tambien nos permite symfony en nuestro composer.json añadimos lo sig:
+      "scripts": {
+        ...rest of code
+        "cs": [
+            "vendor/bin/ecs check --ansi --no-interaction"
+        ],
+        "cs-fix": [
+            "vendor/bin/ecs check --ansi --no-interaction --fix"
+        ],
+      }
+    Luego en terminal para ejecutarlo lanzamos:
+        - composer cs
+        - composer cs-fix para usar los scripts debemos de usar composer
+
+Ahora vamos a instalar php stan, esto es más un analizador estético de código que nos permite tener un código mas robusto, nos constorlar mucho el tipdo tmabien.:
+Installation: Vamos a usar dos librerias:
+    - composer require --dev phpstan/phpstan => libreria completa.
+    - composer require --dev phpstan/extension-installer => Esto nos va a permitir es que cada vez que nosotros instalemos una extension para phpstan que tiene varias para Laravel, Symfony, Doctrine pues el la configura por nosotros.
+
+Configuración:
+    - Para configurar esto debemos de crear en la raíz del proyecto un archivo con la extension .neon llamado phpstan => phpstan.neon
+    phpstan.neon
+        parameters:
+        level: 1 => es recomendable el nivel 1 para empezar ya que podemos solucionar errores mas grandes y luego irle subiendo el nivel para poder fixear pequeñas cosas
+        paths:
+            - src => Que patrh queremos que analice.
+        excludes_analyse:
+            - %rootDir%/src/migrations => que paths queremos que excluya.
+
+Luego debemos de instalar otras extensiones, para poder trabajar con Symfony y Doctrine, porque symfony mete mucha magia con la inyeccion de Deps, Servicios, containers etc y si no estan pues el no va a saber de que tipo son la interfaces que estamos inyectamos o si se encuentran presentes:
+    - composer require --dev phpstan/phpstan-symfony
+        Lo que hace esto es contarle a phpstan la magia de symfony y asi sepa analizar e interpretar mucho mejor nuestro código.
+
+    -Luego de esto debemos de aadirle otra config a nuestro archivo phpstan.neon, que le indica donde esta el archivo xml que representa el container de nuestra app, por supuesto en entorno de desarrolo no en produccion:
+        symfony:
+            container_xml_path: 'var/cache/dev/App_KernelDevDebugContainer.xml'
+
+    - Luego instalar para dcotrine: composer require --dev phpstan/phpstan-doctrine, esto lo que hace es que se entere como funciona los métodos mágicos de nuestros Repositories, y que nos los tome como error si no que el sepa que son métodos mágicos que nos da doctrine
+
+    Ahora lo que recomiendan es crear en la raíz del proyecto una acrpeta llamada build/phpstan con un archivo doctrine-orm-booststrap.php con la sig configuracion:
+        <?php declare(strict_types = 1);
+        use App\Kernel;
+        require dirname(__DIR__) . '/../config/bootstrap.php';
+        $kernel = new Kernel($_SERVER['APP_ENV'], (bool) $_SERVER['APP_DEBUG']);
+        $kernel->boot();
+        return $kernel->getContainer()->get('doctrine')->getManager();
+    Con esto estamos instanciando el Kernel de Symfony y vamos a coger el Entity Manager de Dcotrine, entonces cuando ejecutemos phpstan el se pasara por aquí que va a devolver la instancia de EntityManager. 
+    Luego debemos de añasdir la sig congiguracino al phpstan.neon
+        doctrine:
+            objectManagerLoader: build/phpstan/doctrine-orm-booststrap.php
+    Entonces cuando se ejecute el phpstan va a llamar a este archivo doctrine-orm-booststrap.php va a recuperar eñ EntityManger de aqui y el va automaticamente a detectar los métodos que tiene las etidades a las que estan asociados los Repositorios y un par de cosas más para chequear mas los tipos.
+
+    - Por último debemos de agregar en el phpstan.neon la sig config dentro de doctrine donde agregamos la última el repositoryClass
+        doctrine:
+            objectManagerLoader: build/phpstan/doctrine-orm-booststrap.php
+            repositoryClass: Doctrine/Bundle/DoctrineBundle/Repository/ServiceEntityRepository
+    Luego vamos a BookRepository y le añadimos un phpdocs con lo sig, despues de @method:
+    /**
+     * @method ...etc
+     * @extends \Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository<Book>
+     */
+    Con esto le decimos a php stan que este repository representa esta clase a la entity y como extiende de ServiceEntityRepositor, Book tiene las sig  propiedades (camops de la entity), y que con estas props puedo hacer uso de los metodos magicos (los que da los Repository) con findByTitle, findByImage etc etc
+
+Para lanzar phpstan vamos a crear un nuevo script:
+    "stan": [
+        "vendor/bin/phpstan analyse --ansi --no-interaction"
+    ]

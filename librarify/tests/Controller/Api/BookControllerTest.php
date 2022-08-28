@@ -19,7 +19,7 @@ class BookControllerTest extends WebTestCase
             [],
             ['CONTENT_TYPE' => 'application/json'],
             '{"title": ""}'
-            );
+        );
 
         $this->assertEquals(400, $client->getResponse()->getStatusCode());
     }
@@ -35,7 +35,7 @@ class BookControllerTest extends WebTestCase
             [],
             ['CONTENT_TYPE' => 'application/json'],
             ''
-            );
+        );
 
         $this->assertEquals(400, $client->getResponse()->getStatusCode());
     }
@@ -51,7 +51,7 @@ class BookControllerTest extends WebTestCase
             [],
             ['CONTENT_TYPE' => 'application/json'],
             '{"title": "El imperio final"}'
-            );
+        );
 
         $this->assertEquals(200, $client->getResponse()->getStatusCode());
     }
