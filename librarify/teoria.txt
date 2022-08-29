@@ -764,4 +764,11 @@ Otro cambio a nivel de orm.yml:
 
 - Otro cambio a nivel de BookFormProcessor y CategoryFormProcessor.
 - Otro cambio a nivel de Controller porque estamos buscando creando por id entero ahora en uuid.
-    
+    /**
+     * @Rest\Delete(path="/books/{id}")
+     * @Rest\View(serializerGroups={"book"}, serializerEnableMaxDepthChecks=true)
+     */
+    public function deleteAction(
+        string $id,
+        BookManager $bookManager
+    )
