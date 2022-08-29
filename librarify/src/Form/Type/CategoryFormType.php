@@ -3,7 +3,9 @@
 namespace App\Form\Type;
 
 use App\Form\Model\CategoryDto;
+use Ramsey\Uuid\Uuid;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\CallbackTransformer;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -15,6 +17,18 @@ class CategoryFormType extends AbstractType
         $builder
             ->add('id', TextType::class)
             ->add('name', TextType::class);
+        $builder->get('id')->addModelTransformer(new CallbackTransformer(
+            /** @param Ramsey\Uuid\UuidInterface|null $id */
+            function ($id) {
+                if ($id === null) {
+                    return '';
+                }
+                return $id->String();
+            },
+            function ($id) {
+                return $id === null ? null : Uuid::fromString($id);
+            }
+        ));
     }
 
     public function configureOptions(OptionsResolver $resolver)

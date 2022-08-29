@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 
 class Book
@@ -25,6 +26,11 @@ class Book
     public function getId(): ?UuidInterface
     {
         return $this->id;
+    }
+
+    public static function create(): self
+    {
+        return new self(Uuid::uuid4());
     }
 
     public function getTitle(): ?string
