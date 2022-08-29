@@ -652,3 +652,123 @@ Para lanzar phpstan vamos a crear un nuevo script:
     "stan": [
         "vendor/bin/phpstan analyse --ansi --no-interaction"
     ]
+
+
+!!! UUID !!!.- Nos permite generar ids tipo strings no los que nos generan automaticamente doctrine através de mysql numéricos.
+Pero primero veamos un comando bastante genial en donde nosotros podemos psar de anotaciones a archivos yaml para poder tener nuestras entidades limpias de anotaciones y manejarlas mediante yaml:
+    - bin/console doctrine:mapping:convert yaml ./src
+    Lanzando esto vemos que me genera en este caso tengo solo dos entidades me genero archivos llamados 
+    App.Entity.Book.orm.yaml y App.Entity.Cayegory.orm.yaml, pero vamos a crear una carpeta llamada doctrine dentro de config.
+
+    -Luego vamos al arichovo doctrine.yaml y tenemos que cmbiar la configuración y en ves de decirle que use annotations le decimos que use yml y le cambiamos la direccion tambien en donde le tenemos los archivos x ejm:
+        doctrine.yaml  => Asi viene el archivo por defecto o cuando le configuramos con annotation
+        orm:
+            ...rest of code
+            mappings:
+                App:
+                    is_bundle: false
+                    type: annotation
+                    dir: '%kernel.project_dir%/src/Entity' 
+                    prefix: 'App\Entity'
+                    alias: App
+
+    Como debemos de modificar para que me tome los yml y cambiar la ruta en donde estan las entidades:
+    orm:
+        ...rest of code
+        mappings:
+            App:
+                is_bundle: false
+                type: yml
+                dir: '%kernel.project_dir%/config/doctrine' 
+                prefix: 'App\Entity'
+                alias: App
+En algunos casos da error porque nos genera los archivos que dijimos con App.Entity y hace conflicto, porque aveces toma como el namespace repetido para ello podemos cambiar el nombre de los archivos quitando el App.Entity ejm:
+    - App.Entity.Book.orm.yml => Book.orm.yml
+    - App.Entity.Category.orm.yml => Category.orm.yml
+Entonces ya podemos quitar todas las anotaciones en las entidades generadas en el src/Entity.
+
+Ahora vamos a seguir con la instalación de uuid, de ramsey, esta librería basicamente lo que hace es traer el enganche con doctrine de la propia librería ramsey/uuid que lo que hace es generarnos identificadores únicos de 36 carecteres habitualmente
+
+- Instalción:
+    - composer require ramsey/uuid-doctrine
+    Este ejecuta un receta de flex que lo que hace el es crear un tipo Custom que se va a llamar UuidType
+
+-Configuración:
+    - Debemos de empezar a configurar nuestras entidades podemos hacerlo como en entidades con annotations o como entidades como yml que hermos generado en este caso. debemos de añadir la sig configuracion en el yml:
+    Book.orm.yml   ---- Category.orm.yml
+    id:
+         id:
+            type: uuid
+            generator:
+                strategy: CUSTOM  
+            customIdGenerator:
+                class: Ramsey\Uuid\Doctrine\UuidGenerator
+    Por defecto ya viene creado el id: primero solo debemos de colocar el siguiente pedadzo con esto le decimos que el tipo sera un uuid la estrategio Custom y el CustomGenerator encragado.
+Luego ya podemos generar una migración, si tenemos el DB vacío no existe ningun problema, pero si tenemos talvés nos de errores por los tipos en la foreign key ya que unos serán uuid (strings) y los normales enteros autoincrementales. Por lo cual existe una forma de modificar esto con la libreria habbim/uuid-to-id pero esta un poco mal publicada por lo cual debemos de cambiar varias cosas para poder instalar esta libreria, pero esta libreria nos viene a solucionar muchos prblemas, comom cambiar el tio de dato, cmabiar las foreign keys y varias cosas mas verificar documentación =>
+https://packagist.org/packages/habbim/id-to-uuid.
+
+
+Pero nosotros debemos de seguir configurando porque como cambiamos esto ya no le dejemamos el trabajo de creación de ids con doctrine si no vamos a autogerar nosotros los uuids ver condiguracion de entidades y el mappinf orm.yml de Book y Category ejm:
+
+    Book.php
+  use Ramsey\Uuid\UuidInterface;
+- class Book
+    {
+        private UuidInterface $id;
+
+        private $title;
+
+        private $image;
+
+        private $categories;
+
+        public function __construct(UuidInterface $uuid)
+        {
+            $this->id = $uuid;
+            $this->categories = new ArrayCollection();
+        }
+
+        public function getId(): ?UuidInterface
+        {
+            return $this->id;
+        }
+
+    como vemos en la entidad Book en su constructor le obligamos al id que ya venga autocompletdo el campom id como un la instancion de un UuidInterface. lo mismo hacer todas las Entidades hechas.
+
+Otro cambio a nivel de orm.yml:
+- App\Entity\Book:
+    type: entity
+    table: book
+    repositoryClass: App\Repository\BookRepository
+    id:
+        id:
+            type: uuid => como vemos aqui le quitamos el resto de configuración que tenía y le dejamos asi tal cual aquí solo con el type: uuid porque no queremos delegar a esta librería => Ramsey\Uuid\Doctrine\UuidGenerator que nos genere si no nosotros a nibel de entidad ya hemos hecho este trabajo
+
+- Otro cambio a nivel de BookManager y CategoryManager que son los encragados de gestionar todo:
+    CategoryManager.php
+    ...rest of code
+    use Ramsey\Uuid\Uuid;
+    public function create(): Category
+    {
+        $category = new Category(Uuid::uuid4());
+        return $category;
+    }
+    Como vemos qui le estammos asigannod un uuid de tipo 4 a los ids tanto en Book como Category y asi seguimos cambiando los métodos que tenemos en los manager ya que estamos devolviendo un string uuid y no un entero.
+    ejm:
+
+    use Ramsey\Uuid\UuidInterface;
+    public function find(UuidInterface $id): ?Category
+    {
+        return $this->categoryRepository->find($id);
+    }
+
+- Otro cambio a nivel de BookFormProcessor y CategoryFormProcessor.
+- Otro cambio a nivel de Controller porque estamos buscando creando por id entero ahora en uuid.
+    /**
+     * @Rest\Delete(path="/books/{id}")
+     * @Rest\View(serializerGroups={"book"}, serializerEnableMaxDepthChecks=true)
+     */
+    public function deleteAction(
+        string $id,
+        BookManager $bookManager
+    )
