@@ -3,24 +3,23 @@
 namespace App\Services\Book;
 
 use App\Repository\BookRepository;
-use Exception;
-use Ramsey\Uuid\Uuid;
 
 class DeleteBook
 {
+    private GetBook $getBook;
     private BookRepository $bookRepository;
 
-    public function __construct(BookRepository $bookRepository) {
+    public function __construct(
+        GetBook $getBook,
+        BookRepository $bookRepository
+    ) {
+        $this->getBook = $getBook;
         $this->bookRepository = $bookRepository;
     }
 
     public function __invoke(string $id)
     {
-        $book = $this->bookRepository->find(Uuid::fromString($id));
-        if (!$book) {
-            throw new Exception('That book does not exists');
-        }
-
+        $book = ($this->getBook)($id);
         $this->bookRepository->delete($book);
     }
 }

@@ -19,6 +19,11 @@ class BookDto
         $this->categories = [];
     }
 
+    public static function createEmpty(): self
+    {
+        return new self();
+    }
+
     public static function createFromBook(Book $book): self
     {
         $dto = new self();

@@ -41,13 +41,13 @@ class CategoryRepository extends ServiceEntityRepository
 
     public function persist(Category $category): Category
     {
-        $this->em->persist($category);
+        $this->getEntityManager()->persist($category);
         return $category;
     }
 
     public function reload(Category $category): Category
     {
-        $this->em->refresh($category);
+        $this->getEntityManager()->refresh($category);
         return $category;
     }
 

@@ -17,9 +17,9 @@ class Book
 
     private $categories;
 
-    public function __construct(UuidInterface $uuid)
+    public function __construct(UuidInterface $id)
     {
-        $this->id = $uuid;
+        $this->id = $id;
         $this->categories = new ArrayCollection();
     }
 
@@ -80,4 +80,36 @@ class Book
 
         return $this;
     }
+
+    public function updateCategories(Category ...$categories)
+    {
+        /** @var Category[]|ArrayCollection */
+        $originalCategories = new ArrayCollection();
+        foreach ($this->categories as $category) {
+            $originalCategories->add($category);
+        }
+        
+        // Remove categories
+        // If the user does not send the category, it means that I delete it.
+        foreach ($originalCategories as $originalCategory) {
+            if (!\in_array($originalCategory, $categories)) {
+                $this->removeCategory($originalCategory);
+            }
+        }
+
+        //Add categories
+        foreach ($categories as $newCategory) {
+            if (!$originalCategories->contains($newCategory)) {
+                $this->addCategory($newCategory);
+            }
+        }
+    }
+
+    public function update(string $title, ?string $image, Category ...$categories)
+    {
+        $this->title = $title;
+        $this->image = $image;
+        $this->updateCategories(...$categories);
+    }
 }
+
