@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Entity\Book\Score;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Ramsey\Uuid\Uuid;
@@ -11,26 +12,31 @@ class Book
 {
     private UuidInterface $id;
 
-    private $title;
+    private string $title;
 
-    private $image;
+    private ?string $image;
 
-    private $categories;
+    private Collection $categories;
+
+    private ?string $description;
+
+    private Score $score;
 
     public function __construct(UuidInterface $uuid)
     {
         $this->id = $uuid;
+        $this->score = Score::create();
         $this->categories = new ArrayCollection();
-    }
-
-    public function getId(): ?UuidInterface
-    {
-        return $this->id;
     }
 
     public static function create(): self
     {
         return new self(Uuid::uuid4());
+    }
+
+    public function getId(): ?UuidInterface
+    {
+        return $this->id;
     }
 
     public function getTitle(): ?string
@@ -58,7 +64,7 @@ class Book
     }
 
     /**
-     * @return Collection<int, Category>
+     * @return Collection|Category[]
      */
     public function getCategories(): Collection
     {
@@ -80,4 +86,59 @@ class Book
 
         return $this;
     }
+
+    public function updateCategories(Category ...$categories)
+    {
+        /** @var Category[]|ArrayCollection */
+        $originalCategories = new ArrayCollection();
+        foreach ($this->categories as $category) {
+            $originalCategories->add($category);
+        }
+        
+        // Remove categories
+        // If the user does not send the category, it means that I delete it.
+        foreach ($originalCategories as $originalCategory) {
+            if (!\in_array($originalCategory, $categories)) {
+                $this->removeCategory($originalCategory);
+            }
+        }
+
+        //Add categories
+        foreach ($categories as $newCategory) {
+            if (!$originalCategories->contains(!$newCategory)) {
+                $this->addCategory($newCategory);
+            }
+        }
+    }
+
+    public function update(
+        string $title,
+        ?string $image,
+        ?string $description,
+        ?Score $score,
+        Category ...$categories
+    ) {
+        $this->title = $title;
+        $this->image = $image;
+        $this->description = $description;
+        $this->score = $score;
+        $this->updateCategories(...$categories);
+    }
+    
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+ 
+    public function getScore(): ?Score
+    {
+        return $this->score;
+    }
+
+    public function setScore(?Score $score): self
+    {
+        $this->score = $score;
+        return $this;
+    }
 }
+

@@ -8,6 +8,8 @@ class BookDto
 {
     public ?string $title = null;
     public ?string $base64Image = null;
+    public ?string $description = null;
+    public ?int $score = null;
     /**
      * Undocumented variable
      *
@@ -17,6 +19,11 @@ class BookDto
 
     public function __construct() {
         $this->categories = [];
+    }
+
+    public static function createEmpty(): self
+    {
+        return new self();
     }
 
     public static function createFromBook(Book $book): self
@@ -42,5 +49,15 @@ class BookDto
     public function getCategories(): ?array
     {
         return $this->categories;
+    }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
+    public function getScore(): ?int
+    {
+        return $this->score;
     }
 }

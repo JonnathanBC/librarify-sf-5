@@ -4,15 +4,15 @@ namespace App\Controller\Api;
 
 use App\Entity\Book;
 use App\Repository\BookRepository;
+use App\Services\Book\BookFormProcessor;
 use App\Services\Book\DeleteBook;
 use App\Services\Book\GetBook;
-use App\Services\BookFormProcessor;
 use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\View\View;
-use Symfony\Component\ErrorHandler\ThrowableUtils;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Throwable;
 
 class BooksController extends AbstractFOSRestController
 {
@@ -45,12 +45,12 @@ class BooksController extends AbstractFOSRestController
      * @Rest\View(serializerGroups={"book"}, serializerEnableMaxDepthChecks=true)
      */
     public function postActions(
-        BookFormProcessor $bookFormProcessor,
-        Request $request
+        Request $request,
+        BookFormProcessor $bookFormProcessor
     ) {
         $book = Book::create();
-        [$book, $error] = ($bookFormProcessor)($book, $request);
-        $statusCode = $book ? Response::HTTP_CREATED :Response::HTTP_BAD_REQUEST;
+        [$book, $error] = ($bookFormProcessor)($request);
+        $statusCode = $book ? Response::HTTP_CREATED : Response::HTTP_BAD_REQUEST;
         $data = $book ?? $error;
         return View::create($data, $statusCode);
     }
@@ -60,19 +60,18 @@ class BooksController extends AbstractFOSRestController
      * @Rest\View(serializerGroups={"book"}, serializerEnableMaxDepthChecks=true)
      */
     public function editAction(
+        Request $request,
         string $id,
-        BookFormProcessor $bookFormProcessor,
-        GetBook $getBook,
-        Request $request
+        BookFormProcessor $bookFormProcessor
     ) {
-        $book = ($getBook)($id);
-        if (!$book) {
+        try {
+            [$book, $error] = ($bookFormProcessor)($request);
+            $statusCode = $book ? Response::HTTP_CREATED : Response::HTTP_BAD_REQUEST;
+            $data = $book ?? $error;
+            return View::create($data, $statusCode);
+        } catch (Throwable $e) {
             return View::create('Book not found', Response::HTTP_BAD_REQUEST);
         }
-        [$book, $error] = ($bookFormProcessor)($book, $request);
-        $statusCode = $book ? Response::HTTP_CREATED :Response::HTTP_BAD_REQUEST;
-        $data = $book ?? $error;
-        return View::create($data, $statusCode);
     }
 
      /**
@@ -85,7 +84,7 @@ class BooksController extends AbstractFOSRestController
     ) {
         try {
             ($deleteBook)($id);
-        } catch (ThrowableUtils $t){
+        } catch (Throwable $t){
             return View::create('Book not found', Response::HTTP_BAD_REQUEST);
         }
         return View::create('Book deleted', Response::HTTP_NO_CONTENT);
