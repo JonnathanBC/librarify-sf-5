@@ -3,13 +3,13 @@
 namespace App\Services\Book;
 
 use App\Entity\Book;
+use App\Entity\Book\Score;
 use App\Form\Model\BookDto;
 use App\Form\Model\CategoryDto;
 use App\Form\Type\BookFormType;
 use App\Repository\BookRepository;
 use App\Services\Category\CreateCategory;
 use App\Services\Category\GetCategory;
-use App\Services\CategoryManager;
 use App\Services\FileUploader;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,7 +17,6 @@ use Symfony\Component\HttpFoundation\Request;
 class BookFormProcessor
 {
     private BookRepository $bookRepository;
-    private CategoryManager $categoryManager;
     private FileUploader $fileUploader;
     private FormFactoryInterface $formFactory;
     private GetBook $getBook;
@@ -26,7 +25,6 @@ class BookFormProcessor
 
     public function __construct(
         BookRepository $bookRepository,
-        CategoryManager $categoryManager,
         FileUploader $fileUploader,
         FormFactoryInterface $formFactory,
         GetBook $getBook,
@@ -34,7 +32,6 @@ class BookFormProcessor
         CreateCategory $createCategory
     ) {
         $this->bookRepository = $bookRepository;
-        $this->categoryManager = $categoryManager;
         $this->fileUploader = $fileUploader;
         $this->formFactory = $formFactory;
         $this->getBook = $getBook;
@@ -83,12 +80,17 @@ class BookFormProcessor
         }
 
         $filename = null;
-        if ($bookDto->base64Image) {
+        if ($bookDto->getBase64Image()) {
             $filename = $this->fileUploader->uploadBase64File($bookDto->base64Image);
-            $book->setImage($filename);
         }
 
-        $book->update($bookDto->title, $filename, ...$categories);
+        $book->update(
+            $bookDto->getTitle(),
+            $filename,
+            $bookDto->getDescription(),
+            Score::create($bookDto->getScore()),
+            ...$categories
+        );
         $this->bookRepository->save($book);
         return [$book, null];
     }

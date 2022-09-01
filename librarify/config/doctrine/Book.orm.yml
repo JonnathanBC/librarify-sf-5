@@ -20,6 +20,15 @@ App\Entity\Book:
             unique: false
             nullable: true
             precision: null
+        description:
+            type: text
+            scale: null
+            unique: false
+            nullable: true
+            precision: null
+    embedded:
+        score:
+            class: App\Entity\Book\Score
     manyToMany:
         categories:
             targetEntity: App\Entity\Category

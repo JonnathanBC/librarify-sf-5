@@ -772,3 +772,37 @@ Otro cambio a nivel de orm.yml:
         string $id,
         BookManager $bookManager
     )
+
+!!! VALUE OBJECT !!!.- Estos no son inmutable es decir estos no contendran setters.
+Embeddables de doctrine son una caracteristica muy poco conocida y que nos permite trabajar con los value object de una forma más sencilla.
+Se crea de la sig manera:
+Dentro del archivo Book.orm.yaml a nivel de fields al mismo nivel colocamos lo sig:
+    - embedded:
+        score:
+            class: App\Entity\Book\Score
+
+Luego en el mismo archivo debemos de colocar lo sig alfinal del archivo
+
+App\Entity\Book\Score:
+    type: embeddable
+    fields:
+        value: {type: int}
+Pero dentro de nuestro Book.php debemos de nosotros controlar que este embeddable no sea null, porque si el encuentra un null en el campo donde lo va a crear pues me crea un objeto con un null, por eso debemos de controlar que no sea null en ningun momento por lo cual dentro de nuestra entidad libro lo que vamos ah ahcer es en nuestro contructor inicializxarlo vacío:
+
+    public function __construct()
+    {
+        $this->score = Score::create();
+    }
+Pero es mejor crear un archivo dentro de donde estamos mapeando los orm de nuestras entidades en vez de tener  => esto App\Entity\Book\Score:
+    type: embeddable
+    fields:
+        value: {type: int}
+dentro del mismo archivo porque da error.
+Book.Score.orm.yml => aquí creamos con el prefijo Book por la confiuracion de entidades que tenemos en esta  línea => prefix: 'App\Entity' en doctrine.yaml
+
+App\Entity\Book\Score:
+    type: embeddable
+    fields:
+        value: { type: integer }
+
+Luego debemos de crear las migraciones y lanzarlas.
