@@ -159,5 +159,10 @@ class Book
         $this->score = $score;
         return $this;
     }
+
+    public function __toString()
+    {
+        return $this->title ?? 'Book';   
+    }
 }
 
