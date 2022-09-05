@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Entity\Book\Score;
+use DateTimeImmutable;
+use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Ramsey\Uuid\Uuid;
@@ -22,10 +24,15 @@ class Book
 
     private Score $score;
 
+    private DateTimeInterface $createdAt;
+
+    private ?DateTimeInterface $readAt = null;
+
     public function __construct(UuidInterface $uuid)
     {
         $this->id = $uuid;
         $this->score = Score::create();
+        $this->createdAt = new DateTimeImmutable();
         $this->categories = new ArrayCollection();
     }
 
@@ -116,18 +123,30 @@ class Book
         ?string $image,
         ?string $description,
         ?Score $score,
+        ?DateTimeInterface $readAt,
         Category ...$categories
     ) {
         $this->title = $title;
         $this->image = $image;
         $this->description = $description;
         $this->score = $score;
+        $this->readAt = $readAt;
         $this->updateCategories(...$categories);
     }
     
     public function getDescription(): ?string
     {
         return $this->description;
+    }
+
+    public function getCreatedAt(): ?DateTimeInterface
+    {
+        return $this->createdAt;
+    }
+
+    public function getReadAt(): ?DateTimeInterface
+    {
+        return $this->readAt;
     }
  
     public function getScore(): ?Score
