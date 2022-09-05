@@ -1,0 +1,6 @@
+App\Entity\Author:
+    attributes:
+        id: 
+            groups: ['author']
+        name:
+            groups: ['author']

@@ -24,7 +24,12 @@ class BookFormType extends AbstractType
                 'allow_add' => true, // Añade si no hay una categoria.
                 'allow_delete' => true, // Para poder quitar elementos.
                 'entry_type' => CategoryFormType::class
-            ]);
+            ])
+            ->add('authors', CollectionType::class, [
+                'allow_add' => true,
+                'allow_delete' => true,
+                'entry_type' => AuthorFormType::class
+            ]);;
     }
 
     public function configureOptions(OptionsResolver $resolver)

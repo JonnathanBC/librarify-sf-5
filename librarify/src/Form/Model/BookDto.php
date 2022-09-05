@@ -17,6 +17,9 @@ class BookDto
      */
     public ?array $categories = [];
 
+    /** @var \App\Form\Model\AuthorDto[]|null */
+    public ?array $authors = [];
+
     public function __construct() {
         $this->categories = [];
     }
@@ -59,5 +62,12 @@ class BookDto
     public function getScore(): ?int
     {
         return $this->score;
+    }
+    /**
+     * @return \App\Form\Model\AuthorDto[]|null
+     */
+    public function getAuthors(): ?array
+    {
+        return $this->authors;
     }
 }

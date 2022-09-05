@@ -28,12 +28,15 @@ class Book
 
     private ?DateTimeInterface $readAt = null;
 
+    private Collection $authors;
+
     public function __construct(UuidInterface $uuid)
     {
         $this->id = $uuid;
         $this->score = Score::create();
         $this->createdAt = new DateTimeImmutable();
         $this->categories = new ArrayCollection();
+        $this->authors = new ArrayCollection();
     }
 
     public static function create(): self
@@ -118,13 +121,63 @@ class Book
         }
     }
 
+    /**
+     * @return Collection|Author[]
+     */
+    public function getAuthors(): Collection
+    {
+        return $this->authors;
+    }
+
+    public function addAuthor(Author $author): self
+    {
+        if (!$this->authors->contains($author)) {
+            $this->authors[] = $author;
+        }
+
+        return $this;
+    }
+
+    public function removeAuthor(Author $author): self
+    {
+        if ($this->authors->contains($author)) {
+            $this->authors->removeElement($author);
+        }
+
+        return $this;
+    }
+
+    public function updateAuthors(Author ...$authors)
+    {
+        /** @var Author[]|ArrayCollection */
+        $originalAuthors = new ArrayCollection();
+        foreach ($this->authors as $author) {
+            $originalAuthors->add($author);
+        }
+
+        // Remove authors
+        foreach ($originalAuthors as $originalAuthor) {
+            if (!\in_array($originalAuthor, $authors)) {
+                $this->removeAuthor($originalAuthor);
+            }
+        }
+
+        // Add authors
+        foreach ($authors as $newAuthor) {
+            if (!$originalAuthors->contains($newAuthor)) {
+                $this->addAuthor($newAuthor);
+            }
+        }
+    }
+
     public function update(
         string $title,
         ?string $image,
         ?string $description,
         ?Score $score,
         ?DateTimeInterface $readAt,
-        Category ...$categories
+        array $authors,
+        array $categories
     ) {
         $this->title = $title;
         $this->image = $image;
@@ -132,6 +185,7 @@ class Book
         $this->score = $score;
         $this->readAt = $readAt;
         $this->updateCategories(...$categories);
+        $this->updateAuthors(...$authors);
     }
     
     public function getDescription(): ?string
