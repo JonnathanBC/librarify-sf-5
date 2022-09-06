@@ -836,3 +836,12 @@ Sonata admin nos provee de unos comandos para poder nosotros crear nuestras clas
       -The fully qualified model class:  => esto nos pide
         -  App\Entity\Category Luegpo nos pedira una serie de confirmsciones que sengun las necesidades la podemos nosotros colocar si o no.
     
+!!! EVENT DISPATCHER !!!.- Nos a permitir reaccionar a cosas que sucedan dentro de nuestro sistema mediante eventos.
+Symofny tiene una herrmienta llamada profiler que nos permite verificar petiones error logs etc etc.
+Instalación:
+    - composer require --dev symfony/profiler-pack
+Tambine nos provee otra herrameinta llamada varDumper Component que nos va permitir dumpear nuestras variables y mostralas en nuestro profiler:
+Instalación:
+    - composer require --dev symfony/var-dumper
+    - composer require --dev symfony/debug-bundle => esto va de la mano con el de arriba.
+    - composer require --dev ekino/phpstan-banned-code => Esto lo instalasmos para nosotros poder agragar un banned code a nuestro php estan para las variable como print_r, dum, var_dump porque nuestro debug_bundle se ha instalado en dev y en produccion no se va a instalar y cuando en produccion quiera acceder a esta variable va a petar, para eso le agregamos al phpstan.neon una config para que no pete y le instalamos eso para que funcione. Esto nos avisa cuando encuentra código que nosotros hemos baneado, invoaciones a echo print_r típicos de debugear con esto php stan nos va a avisar.

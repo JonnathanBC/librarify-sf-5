@@ -8,6 +8,8 @@ use App\Form\Model\BookDto;
 use App\Form\Model\CategoryDto;
 use App\Form\Type\BookFormType;
 use App\Repository\BookRepository;
+use App\Services\Author\CreateAuthor;
+use App\Services\Author\GetAuthor;
 use App\Services\Category\CreateCategory;
 use App\Services\Category\GetCategory;
 use App\Services\FileUploader;
@@ -22,20 +24,26 @@ class BookFormProcessor
     private GetBook $getBook;
     private GetCategory $getCategory;
     private CreateCategory $createCategory;
-
+    private GetAuthor $getAuthor;
+    private CreateAuthor $createAuthor;
+    
     public function __construct(
         BookRepository $bookRepository,
         FileUploader $fileUploader,
         FormFactoryInterface $formFactory,
         GetBook $getBook,
         GetCategory $getCategory,
-        CreateCategory $createCategory
+        CreateCategory $createCategory,
+        GetAuthor $getAuthor,
+        CreateAuthor $createAuthor
     ) {
         $this->bookRepository = $bookRepository;
         $this->fileUploader = $fileUploader;
         $this->formFactory = $formFactory;
         $this->getBook = $getBook;
+        $this->getAuthor = $getAuthor;
         $this->getCategory = $getCategory;
+        $this->createAuthor = $createAuthor;
         $this->createCategory = $createCategory;
     }
 

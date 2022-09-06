@@ -33,8 +33,9 @@ class BooksController extends AbstractFOSRestController
         string $id,
         GetBook $getBook
     ) {
-        $book = ($getBook)($id);
-        if(!$book) {
+        try {
+            $book = ($getBook)($id);
+        } catch (\Throwable $th) {
             return View::create('Book not found', Response::HTTP_BAD_REQUEST);
         }
         return $book;

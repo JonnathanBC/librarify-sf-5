@@ -9,10 +9,9 @@ use Ramsey\Uuid\UuidInterface;
 
 class Author
 {
-    /** @var Collection<int,Book> $books */
-    private Collection $books;
     private UuidInterface $id;
     private string $name;
+    private $books;
 
     public function __construct(UuidInterface $id, string $name)
     {

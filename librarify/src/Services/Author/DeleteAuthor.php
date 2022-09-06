@@ -3,7 +3,7 @@
 namespace App\Services\Author;
 
 use App\Repository\AuthorRepository;
-use App\Service\Author\GetAuthor;
+use App\Services\Author\GetAuthor;
 
 class DeleteAuthor
 {
