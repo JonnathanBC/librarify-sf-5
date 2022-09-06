@@ -7,19 +7,23 @@ use Doctrine\Common\Collections\Collection;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 
-class Category
+class Author
 {
+    /** @var Collection<int,Book> $books */
+    private Collection $books;
     private UuidInterface $id;
+    private string $name;
 
-    private $name;
-
-    private $books;
-
-    public function __construct(UuidInterface $id, $name)
+    public function __construct(UuidInterface $id, string $name)
     {
         $this->id = $id;
         $this->name = $name;
         $this->books = new ArrayCollection();
+    }
+
+    public function getId(): ?UuidInterface
+    {
+        return $this->id;
     }
 
     public static function create(string $name): self
@@ -27,11 +31,6 @@ class Category
         return new self(Uuid::uuid4(), $name);
     }
 
-
-    public function getId(): ?UuidInterface
-    {
-        return $this->id;
-    }
 
     public function getName(): ?string
     {
@@ -46,7 +45,7 @@ class Category
     }
 
     /**
-     * @return Collection<int, Book>
+     * @return Collection<int,Book> $books
      */
     public function getBooks(): Collection
     {
@@ -57,7 +56,7 @@ class Category
     {
         if (!$this->books->contains($book)) {
             $this->books[] = $book;
-            $book->addCategory($this);
+            $book->addAuthor($this);
         }
 
         return $this;
@@ -65,8 +64,9 @@ class Category
 
     public function removeBook(Book $book): self
     {
-        if ($this->books->removeElement($book)) {
-            $book->removeCategory($this);
+        if ($this->books->contains($book)) {
+            $this->books->removeElement($book);
+            $book->removeAuthor($this);
         }
 
         return $this;
@@ -80,6 +80,6 @@ class Category
 
     public function __toString()
     {
-        return $this->name ?? 'Category';   
+        return $this->name ?? 'Autor';
     }
 }

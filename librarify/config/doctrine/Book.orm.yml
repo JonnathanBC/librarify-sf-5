@@ -26,6 +26,12 @@ App\Entity\Book:
             unique: false
             nullable: true
             precision: null
+        createdAt:
+            type: datetime
+            nullable: false
+        readAt:
+            type: date
+            nullable: true
     embedded:
         score:
             class: App\Entity\Book\Score
@@ -46,6 +52,25 @@ App\Entity\Book:
                 inverseJoinColumns:
                     -
                         name: category_id
+                        referencedColumnName: id
+                        onDelete: CASCADE
+            orderBy: null
+        authors:
+            targetEntity: App\Entity\Author
+            cascade: {  }
+            fetch: LAZY
+            mappedBy: null
+            inversedBy: books
+            joinTable:
+                name: book_author
+                joinColumns:
+                    -
+                        name: book_id
+                        referencedColumnName: id
+                        onDelete: CASCADE
+                inverseJoinColumns:
+                    -
+                        name: author_id
                         referencedColumnName: id
                         onDelete: CASCADE
             orderBy: null

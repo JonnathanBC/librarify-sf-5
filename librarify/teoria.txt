@@ -1,4 +1,6 @@
 !!! Rutas y controladores !!!.- Symfony nos recomiendo usar las anotaciones cuando nosotros queremos generar rutas desde un controladore, por lo que nos ofrece un bundle para poder emplear dichas anotacinoes:
+Para bajar la establidad a composer:
+    - composer config minimum-stability dev
 Instalacion:
     - composer require annotations
     Lo que hace esto instalar el bundle y ejecuta unas recetas las cuales nos configuran los archivos necesarios para su correcto uso de este paquete, automagicamente symfony lo coloca dentro las configuraciones.
@@ -806,3 +808,31 @@ App\Entity\Book\Score:
         value: { type: integer }
 
 Luego debemos de crear las migraciones y lanzarlas.
+
+!!! SONATA ADMINN !!! Es muchisimo mas flexible que easy admin.
+Debemos de colocar que nos traiga la establidad mínima del paquete:
+    - composer require sonata-project/admin-bundle //Fijarse bien en el paquete que sea compatible.
+
+Debemos de instalar esto para que nos funcione todo lo que es de doctrine para poder nosotros generar con la línea de comandos.
+composer require sonata-project/doctrine-orm-admin-bundle
+
+Configuracion:
+    - Debemos de colocar la sig conf dentro de framework.yaml.
+        // config/packages/framework
+        translator: {
+            fallbacks: ['es']
+        }
+    - LAs rutas ya vienen configuradas por nosotros gracias a flex, lo que sio debemos es limpiar la cache.
+
+    -Luego lo que si debemos instalar es los assets:
+        - bin/console assets:install
+
+Ya con esto debería funcionar, lo que debemos de hacer es colocar las siguiente ruta:
+    http://localhost:1000/admin y tendremos nuestro panel de admin.
+
+Sonata admin nos provee de unos comandos para poder nosotros crear nuestras clases de administracion atraves de Dcotrine con el sig comando:
+    - bin/console make:sonata:admin
+    Luego nos pedira la clase que tengamos y el la va a crear ese panel en eset caso debemos pasarle el namespace completo para tome la clase en este caso Category y la cree en el panel:
+      -The fully qualified model class:  => esto nos pide
+        -  App\Entity\Category Luegpo nos pedira una serie de confirmsciones que sengun las necesidades la podemos nosotros colocar si o no.
+    

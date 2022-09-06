@@ -45,15 +45,10 @@ class BookFormProcessor
         $bookDto = null;
 
         if ($bookId === null) {
-            $book = Book::create();
             $bookDto = BookDto::createEmpty();
         } else {
             $book = ($this->getBook)($bookId);
-            $bookDto = BookDto::createFromBook($book);
-            foreach ($book->getCategories() as $category) {
-                // We keep the original categories
-                $bookDto->categories[] = CategoryDto::createFromCategory($category);
-            }
+            $bookDto =  BookDto::createFromBook($book);
         }
         // handleForm
         $form = $this->formFactory->create(BookFormType::class, $bookDto);
@@ -68,7 +63,7 @@ class BookFormProcessor
         // Category loading.
         $categories = [];
         // Iteration of the categories sent by the user
-        foreach ($bookDto->getCategories() as $newCategoryDto) {
+        foreach ($bookDto->categories as $newCategoryDto) {
             $category = null;
             if ($newCategoryDto->getId() !== null) {
                 $category = ($this->getCategory)($newCategoryDto->getId());
@@ -79,18 +74,44 @@ class BookFormProcessor
             $categories[] = $category;
         }
 
+        $authors = [];
+        foreach ($bookDto->authors as $newAuthorDto) {
+            $author = null;
+            if ($newAuthorDto->id !== null) {
+                $author = ($this->getAuthor)($newAuthorDto->id);
+            }
+            if ($author === null) {
+                $author = ($this->createAuthor)($newAuthorDto->name);
+            }
+            $authors[] = $author;
+        }
+
         $filename = null;
-        if ($bookDto->getBase64Image()) {
+        if ($bookDto->base64Image) {
             $filename = $this->fileUploader->uploadBase64File($bookDto->base64Image);
         }
 
-        $book->update(
-            $bookDto->getTitle(),
-            $filename,
-            $bookDto->getDescription(),
-            Score::create($bookDto->getScore()),
-            ...$categories
-        );
+        if ($book === null) {
+            $book = Book::create(
+                $bookDto->title,
+                $filename,
+                $bookDto->description,
+                Score::create($bookDto->score),
+                $bookDto->readAt,
+                $authors,
+                $categories
+            );
+        } else {
+            $book->update(
+                $bookDto->title,
+                $filename === null ? $book->getImage() : $filename,
+                $bookDto->description,
+                Score::create($bookDto->score),
+                $bookDto->readAt,
+                $authors,
+                $categories
+            );
+        }
         $this->bookRepository->save($book);
         return [$book, null];
     }
