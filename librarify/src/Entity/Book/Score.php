@@ -10,7 +10,7 @@ class Score
 
     public function __construct(?int $value = null)
     {
-        $this->aseertValueIsValid($value);
+        $this->assertValueIsValid($value);
         $this->value = $value;
     }
 
@@ -24,8 +24,7 @@ class Score
         return $this->value;
     }
 
-    private function aseertValueIsValid(?int $value)
-    {
+    private function assertValueIsValid(?int $value) {
         if ($value === null) {
             return null;
         }

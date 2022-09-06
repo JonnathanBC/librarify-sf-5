@@ -44,11 +44,10 @@ class BooksController extends AbstractFOSRestController
      * @Rest\Post(path="/books")
      * @Rest\View(serializerGroups={"book"}, serializerEnableMaxDepthChecks=true)
      */
-    public function postActions(
-        Request $request,
-        BookFormProcessor $bookFormProcessor
+    public function postAction(
+        BookFormProcessor $bookFormProcessor,
+        Request $request
     ) {
-        $book = Book::create();
         [$book, $error] = ($bookFormProcessor)($request);
         $statusCode = $book ? Response::HTTP_CREATED : Response::HTTP_BAD_REQUEST;
         $data = $book ?? $error;
@@ -60,12 +59,12 @@ class BooksController extends AbstractFOSRestController
      * @Rest\View(serializerGroups={"book"}, serializerEnableMaxDepthChecks=true)
      */
     public function editAction(
-        Request $request,
         string $id,
-        BookFormProcessor $bookFormProcessor
+        BookFormProcessor $bookFormProcessor,
+        Request $request
     ) {
         try {
-            [$book, $error] = ($bookFormProcessor)($request);
+            [$book, $error] = ($bookFormProcessor)($request, $id);
             $statusCode = $book ? Response::HTTP_CREATED : Response::HTTP_BAD_REQUEST;
             $data = $book ?? $error;
             return View::create($data, $statusCode);

@@ -30,18 +30,42 @@ class Book
 
     private Collection $authors;
 
-    public function __construct(UuidInterface $uuid)
+    public function __construct(UuidInterface $uuid, string $title, ?string $image)
     {
         $this->id = $uuid;
-        $this->score = Score::create();
+        $this->title = $title;
+        $this->image = $image;
+        $this->score = new Score();
         $this->createdAt = new DateTimeImmutable();
         $this->categories = new ArrayCollection();
         $this->authors = new ArrayCollection();
     }
 
-    public static function create(): self
-    {
-        return new self(Uuid::uuid4());
+    /**
+     * @param array|Author[] $authors
+     * @param array|Category[] $categories
+     * @return self
+     */
+    public static function create(
+        string $title,
+        ?string $image,
+        ?string $description,
+        ?Score $score,
+        ?DateTimeInterface $readAt,
+        array $authors,
+        array $categories
+    ): self {
+        $book = new self(
+            Uuid::uuid4(),
+            $title,
+            $image,
+            $description,
+            $score ?? new Score(),
+            $readAt,
+            new ArrayCollection($authors),
+            new ArrayCollection($categories)
+        );
+        return $book;
     }
 
     public function getId(): ?UuidInterface
@@ -193,14 +217,36 @@ class Book
         return $this->description;
     }
 
+    public function setDescription($description)
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
     public function getCreatedAt(): ?DateTimeInterface
     {
         return $this->createdAt;
     }
 
+    public function setCreatedAt($createdAt): self
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+
     public function getReadAt(): ?DateTimeInterface
     {
         return $this->readAt;
+    }
+
+    public function setReadAt($readAt)
+    {
+        $this->readAt = $readAt;
+
+        return $this;
     }
  
     public function getScore(): ?Score
@@ -218,5 +264,6 @@ class Book
     {
         return $this->title ?? 'Book';   
     }
+    
 }
 
