@@ -23,7 +23,7 @@ class CategoryFormType extends AbstractType
                 if ($id === null) {
                     return '';
                 }
-                return $id->String();
+                return $id->toString();
             },
             function ($id) {
                 return $id === null ? null : Uuid::fromString($id);

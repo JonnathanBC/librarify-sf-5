@@ -20,9 +20,9 @@ class AuthorFormProcessor
         AuthorRepository $authorRepository,
         FormFactoryInterface $formFactoryInterface
     ) {
-    $this->getAuthor = $getAuthor;
-    $this->authorRepository = $authorRepository;
-    $this->formFactoryInterface = $formFactoryInterface;
+        $this->getAuthor = $getAuthor;
+        $this->authorRepository = $authorRepository;
+        $this->formFactoryInterface = $formFactoryInterface;
     }
 
     public function __invoke(Request $request, ?string $authorId = null): array
@@ -47,11 +47,9 @@ class AuthorFormProcessor
         }
 
         if ($author === null) {
-            $author = Author::create($authorDto->name);
+            $author = Author::create($authorDto->getName());
         } else {
-            $author->update(
-                $authorDto->name
-            );
+            $author->update($authorDto->getName());
         }
 
         $this->authorRepository->save($author);

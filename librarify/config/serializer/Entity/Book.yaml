@@ -14,3 +14,7 @@ App\Entity\Book:
             groups: ['book']
         authors:
             groups: ['book']
+        createdAt:
+            groups: ['book']
+        readAt:
+            groups: ['book']

@@ -2,7 +2,6 @@
 
 namespace App\Controller\Api;
 
-use App\Entity\Book;
 use App\Repository\BookRepository;
 use App\Services\Book\BookFormProcessor;
 use App\Services\Book\DeleteBook;
@@ -56,13 +55,28 @@ class BooksController extends AbstractFOSRestController
     }
 
     /**
-     * @Rest\Post(path="/books/{id}")
+     * @Rest\Patch(path="/books/{id}")
+     * @Rest\View(serializerGroups={"book"}, serializerEnableMaxDepthChecks=true)
+     */
+    public function patchAction(
+        string $id,
+        GetBook $getBook,
+        Request $request
+    ) {
+        $book = ($getBook)($id);
+        $data = json_decode($request->getContent(), true);
+        $book->patch($data);
+        return View::create($book, Response::HTTP_OK);
+    }
+
+    /**
+     * @Rest\Put(path="/books/{id}")
      * @Rest\View(serializerGroups={"book"}, serializerEnableMaxDepthChecks=true)
      */
     public function editAction(
+        Request $request,
         string $id,
-        BookFormProcessor $bookFormProcessor,
-        Request $request
+        BookFormProcessor $bookFormProcessor
     ) {
         try {
             [$book, $error] = ($bookFormProcessor)($request, $id);

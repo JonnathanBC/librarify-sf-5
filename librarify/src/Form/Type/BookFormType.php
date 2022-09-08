@@ -5,6 +5,7 @@ namespace App\Form\Type;
 use App\Form\Model\BookDto;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
+use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -20,6 +21,15 @@ class BookFormType extends AbstractType
             ->add('base64Image', TextType::class)
             ->add('description', TextareaType::class)
             ->add('score', NumberType::class)
+            ->add(
+                'readAt',
+                DateType::class,
+                [
+                    'widget' => 'single_text',
+                    'format' => 'yyyy-MM-dd',
+                    'html5' => false
+                ]
+            )
             ->add('categories', CollectionType::class, [
                 'allow_add' => true, // Añade si no hay una categoria.
                 'allow_delete' => true, // Para poder quitar elementos.
@@ -29,7 +39,7 @@ class BookFormType extends AbstractType
                 'allow_add' => true,
                 'allow_delete' => true,
                 'entry_type' => AuthorFormType::class
-            ]);;
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver)

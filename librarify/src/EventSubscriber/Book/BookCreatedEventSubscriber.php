@@ -9,11 +9,13 @@ use Psr\Log\LoggerInterface;
 
 class BookCreatedEventSubscriber implements EventSubscriberInterface
 {
-    private LoggerInterface $logger;
     private GetBook $getBook;
+    private LoggerInterface $logger;
 
-    public function __construct(GetBook $getBook, LoggerInterface $logger)
-    {
+    public function __construct(
+        GetBook $getBook,
+        LoggerInterface $logger
+    ) {
         $this->getBook = $getBook;
         $this->logger = $logger;
     }
@@ -25,7 +27,7 @@ class BookCreatedEventSubscriber implements EventSubscriberInterface
         ];
     }
 
-    public function onbookCreated(BookCreatedEvent $event)
+    public function onBookCreated(BookCreatedEvent $event)
     {
         $book = ($this->getBook)($event->getBookId()->toString());
         $this->logger->info(sprintf('Book created: %s', $book->getTitle()));

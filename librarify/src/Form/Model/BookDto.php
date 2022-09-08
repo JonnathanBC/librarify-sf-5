@@ -3,9 +3,7 @@
 namespace App\Form\Model;
 
 use App\Entity\Book;
-use App\Entity\Category;
 use DateTimeInterface;
-use Doctrine\Common\Collections\Collection;
 
 class BookDto
 {
@@ -19,7 +17,8 @@ class BookDto
     /** @var \App\Form\Model\AuthorDto[]|null */
     public ?array $authors = [];
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->categories = [];
     }
 

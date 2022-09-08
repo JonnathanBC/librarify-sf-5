@@ -1,6 +1,6 @@
 App\Entity\Author:
     attributes:
         id: 
-            groups: ['author']
+            groups: ['author', 'book']
         name:
-            groups: ['author']
+            groups: ['author', 'book']
