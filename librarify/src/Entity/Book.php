@@ -3,12 +3,14 @@
 namespace App\Entity;
 
 use App\Entity\Book\Score;
+use App\Event\Book\BookCreatedEvent;
 use DateTimeImmutable;
 use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
+use Symfony\Contracts\EventDispatcher\Event;
 
 class Book
 {
@@ -18,30 +20,59 @@ class Book
 
     private ?string $image;
 
+    /** @var Collection|Category[] */
     private Collection $categories;
-
-    private ?string $description;
+    
+    /** @var Collection|Author[] */
+    private Collection $authors;
 
     private Score $score;
 
+    private ?string $description;
+    
     private DateTimeInterface $createdAt;
+    
+    private ?DateTimeInterface $readAt;
 
-    private ?DateTimeInterface $readAt = null;
+    private array $domainEvents;
 
-    private Collection $authors;
-
-    public function __construct(UuidInterface $uuid, string $title, ?string $image)
-    {
-        $this->id = $uuid;
+    /**
+     * @param UuidInterface $id
+     * @param string $title
+     * @param string|null $image
+     * @param string|null $description
+     * @param Score|null $score
+     * @param DateTimeInterface|null $readAt
+     * @param Collection|Author[]|null $authors
+     * @param Collection|Category[]|null $categories
+     */
+    public function __construct(
+        UuidInterface $id,
+        string $title,
+        ?string $image,
+        ?string $description,
+        ?Score $score,
+        ?DateTimeInterface $readAt,
+        ?Collection $authors,
+        ?Collection $categories
+    ) {
+        $this->id = $id;
         $this->title = $title;
         $this->image = $image;
-        $this->score = new Score();
+        $this->description = $description;
+        $this->score = $score ?? Score::create();
+        $this->readAt = $readAt;
+        $this->categories = $categories ?? new ArrayCollection();
+        $this->authors = $authors ?? new ArrayCollection();
         $this->createdAt = new DateTimeImmutable();
-        $this->categories = new ArrayCollection();
-        $this->authors = new ArrayCollection();
     }
 
     /**
+     * @param string $title
+     * @param string|null $image
+     * @param string|null $description
+     * @param Score|null $score
+     * @param DateTimeInterface|null $readAt
      * @param array|Author[] $authors
      * @param array|Category[] $categories
      * @return self
@@ -55,17 +86,28 @@ class Book
         array $authors,
         array $categories
     ): self {
-        $book = new self(
+        $book =  new self(
             Uuid::uuid4(),
             $title,
             $image,
             $description,
-            $score ?? new Score(),
+            $score,
             $readAt,
             new ArrayCollection($authors),
             new ArrayCollection($categories)
         );
+        $book->addDomainEvent(new BookCreatedEvent($book->getId()));
         return $book;
+    }
+
+    public function addDomainEvent(Event $event): void
+    {
+        $this->domainEvents[] = $event;
+    }
+
+    public function pullDomainEvent(): array
+    {
+        return $this->domainEvents;
     }
 
     public function getId(): ?UuidInterface

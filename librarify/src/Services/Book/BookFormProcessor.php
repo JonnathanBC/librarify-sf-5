@@ -15,6 +15,7 @@ use App\Services\Category\GetCategory;
 use App\Services\FileUploader;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class BookFormProcessor
 {
@@ -26,6 +27,7 @@ class BookFormProcessor
     private CreateCategory $createCategory;
     private GetAuthor $getAuthor;
     private CreateAuthor $createAuthor;
+    private EventDispatcherInterface $eventDispatcher;
     
     public function __construct(
         BookRepository $bookRepository,
@@ -35,7 +37,8 @@ class BookFormProcessor
         GetCategory $getCategory,
         CreateCategory $createCategory,
         GetAuthor $getAuthor,
-        CreateAuthor $createAuthor
+        CreateAuthor $createAuthor,
+        EventDispatcherInterface $eventDispatcher
     ) {
         $this->bookRepository = $bookRepository;
         $this->fileUploader = $fileUploader;
@@ -45,6 +48,7 @@ class BookFormProcessor
         $this->getCategory = $getCategory;
         $this->createAuthor = $createAuthor;
         $this->createCategory = $createCategory;
+        $this->eventDispatcher = $eventDispatcher;
     }
 
     public function __invoke(Request $request, ?string $bookId = null): array
@@ -57,7 +61,11 @@ class BookFormProcessor
         } else {
             $book = ($this->getBook)($bookId);
             $bookDto =  BookDto::createFromBook($book);
+            foreach ($book->getCategories() as $category) {
+                $bookDto->categories[] = CategoryDto::createFromCategory($category);
+            }
         }
+
         // handleForm
         $form = $this->formFactory->create(BookFormType::class, $bookDto);
         $form->handleRequest($request);
@@ -121,6 +129,9 @@ class BookFormProcessor
             );
         }
         $this->bookRepository->save($book);
+        foreach ($book->pullDomainEvent() as $event) {
+            $this->eventDispatcher->dispatch($event);
+        }
         return [$book, null];
     }
 }

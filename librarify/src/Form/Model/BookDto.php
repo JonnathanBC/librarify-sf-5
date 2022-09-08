@@ -3,7 +3,9 @@
 namespace App\Form\Model;
 
 use App\Entity\Book;
+use App\Entity\Category;
 use DateTimeInterface;
+use Doctrine\Common\Collections\Collection;
 
 class BookDto
 {

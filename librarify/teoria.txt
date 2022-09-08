@@ -845,3 +845,8 @@ Instalación:
     - composer require --dev symfony/var-dumper
     - composer require --dev symfony/debug-bundle => esto va de la mano con el de arriba.
     - composer require --dev ekino/phpstan-banned-code => Esto lo instalasmos para nosotros poder agragar un banned code a nuestro php estan para las variable como print_r, dum, var_dump porque nuestro debug_bundle se ha instalado en dev y en produccion no se va a instalar y cuando en produccion quiera acceder a esta variable va a petar, para eso le agregamos al phpstan.neon una config para que no pete y le instalamos eso para que funcione. Esto nos avisa cuando encuentra código que nosotros hemos baneado, invoaciones a echo print_r típicos de debugear con esto php stan nos va a avisar.
+
+Para este DISPATCHER debemos de instalarlo nuestro componente dispatcher de symfony:
+    - composer require symfony/event-dispatcher
+
+Nosotros lo que vamos hacer como ejm es cuando creamos un libro, un subscriber va a logear en los logger típocos de Sf.
