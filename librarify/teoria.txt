@@ -850,3 +850,9 @@ Para este DISPATCHER debemos de instalarlo nuestro componente dispatcher de symf
     - composer require symfony/event-dispatcher
 
 Nosotros lo que vamos hacer como ejm es cuando creamos un libro, un subscriber va a logear en los logger típocos de Sf.
+
+!!! HTTP CLIENT !!!.- Nos permite hacer llamadas contra apis externas, lo mas recomendado usar con symfony para comunicacion con servicios externos..!!.
+
+Instalación:
+  - composer require symfony/http-client
+  Funciona mediante inyeccion de dependencias.
