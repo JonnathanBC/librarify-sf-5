@@ -2,6 +2,8 @@ FROM php:7.4-fpm
 
 ARG TIMEZONE
 
+RUN usermod -u 1000 www-data
+
 COPY php.ini /usr/local/etc/php/conf.d/docker-php-config.ini
 
 RUN apt update \

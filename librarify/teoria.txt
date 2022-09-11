@@ -856,3 +856,42 @@ Nosotros lo que vamos hacer como ejm es cuando creamos un libro, un subscriber v
 Instalación:
   - composer require symfony/http-client
   Funciona mediante inyeccion de dependencias.
+
+!!! AUTH JWT !!!.- Primero vamos a eliminar el sistema de autenticacion de cabecera que teniamos, luegi tenemos que crear nuestra entidad usuarios contra el DB y crear nuestro primero usuario.
+Lo podemos hacer con el sig comando:
+    - bin/console make:user coden esto creamos la entidad.
+
+Luego para crear usuarios en DB podemos hacer uso de comandos gracias a la libreria symfony fixture, que nos permite crear archivos como un "controller", lanzamos el comandos y este ve que el archivo que creamos extienda de Fixture y la ejecuta.
+Instalación:
+    - composer require --dev orm-fixtures
+Luego siguiendo la documentacion podemos genersr esos usuarios. como en el ejemplo dentro de
+src/DataFixtures/UserFixture.php
+
+Luego debemos de ejecutar esta fixture con el sig comando:
+    - bin/console doctrine:fixtures:load
+    Pero debemosd de tenet cuidado porque esto lo que hace es limpiar el DB, para solucionar esto debemos de lanzar pero con un flag --append ejm:
+    - bin/console doctrine:fixtures:load --append
+
+Ahora si vamos a instalar el bundle para jwt que en este caso usaremos lexik
+Instalación:
+    - composer require lexik/jwt-authentication-bundle
+Configuración:
+    - Debemos generar un certificado público y privado para firmar nuestro JWT, sin que alguién nos pueda enviarme un JWT que no hayamos emitido y evitar errores de seguridad y que nos codifiquen el sistema etc etc. Para ello debemos de lanzar el siguiente comando:
+    - bin/console lexik:jwt:generate-keypair
+    Esto nos genera 3 variables de entorno en nuestro .env, ls cuales debemos de configurar la importante como variable de entorno escondida como la documentación.
+    https://symfony.com/bundles/LexikJWTAuthenticationBundle/current/index.html
+
+    -Luego debemos de actualizar nuestro security.yaml, dentro de los firewalls, donde le vamos a decir que quermos que use para la autenticación:
+    login:
+        pattern: ^/api/login
+        stateless: true
+        json_login:
+            check_path: /api/login_check # or api_login_check as defined in config/routes.yaml
+            success_handler: lexik_jwt_authentication.handler.authentication_success
+            failure_handler: lexik_jwt_authentication.handler.authentication_failure
+
+    - Luego debemos de configurar nuestro routes.yaml
+    # config/routes.yaml
+    api_login_check:
+        path: /api/login_check
+Entonces esta se mandaria ahora por Bearer Token.
