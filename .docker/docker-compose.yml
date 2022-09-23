@@ -3,12 +3,12 @@ services:
         image: mysql:8.0.20
         # command: --default-authentication-plugin=mysql_native_password
         volumes:
-            - "db_librarify:/var/lib/mysql"
+            - "sql_librarify:/var/lib/mysql"
         environment:
-            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-            MYSQL_DATABASE: ${MYSQL_DATABASE}
-            MYSQL_USER: ${MYSQL_USER}
-            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+            MYSQL_ROOT_PASSWORD: hola
+            MYSQL_DATABASE: librarify
+            MYSQL_USER: librarify_usr
+            MYSQL_PASSWORD: hola1234
         ports:
             - 3306:3306
         networks:
@@ -45,10 +45,9 @@ services:
             - symfony
 
 volumes:
-    db_librarify:
+    sql_librarify:
 
 networks:
     symfony:
 
-#sudo chmod -R 777 /path/to/directory Run if permissions are denied
     
