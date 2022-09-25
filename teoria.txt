@@ -897,3 +897,25 @@ Configuración:
     api_login_check:
         path: /api/login_check
 Entonces esta se mandaria ahora por Bearer Token.
+
+!!! DOCKER SYNC !!!.- Esto nos permite sincronizar nuestros archivos del proyecto de una forma más rápida cuando estamos desarrollando.
+Lo debemos instalar en nuestro ordenador con el sig comando:
+    - gem install docker-sync
+Pasos:
+    1) Cremaos un archivo docker-sync.yml con la configuración colocada ahí dentro.
+    2) En nuestro docker compose lo que debemos de hacer es crear un volumen en la parte final con el mismo nombre que le colocamos en el archivo docker.sync.yml en este caso librarifyback_app_sync con el external true ejm:
+    volumes:
+    librarifyback_app_sync:
+        external: true
+
+    3) Debemos de colocar este volumen creado a los volumenes de nuesttos servicios con en nginx, php ejm: 
+        nginx:
+        image: nginx:stable-alpine
+        ports:
+            - 1000:80
+        volumes:
+            - librarifyback_app_sync:/var/www/librarify
+            - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+
+    4) Debemos de detener nuestros contenedores para poder ejecutarlo. Luego de detener lanzamos el sig comando:
+        - docker-sync-stack start que lo que va a hacer es ejecutar docker sync y levanatr todo el stack que tenemos en docker compose y realizar la sincronizacíon por nosotros.
