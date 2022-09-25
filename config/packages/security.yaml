@@ -20,16 +20,16 @@ security:
             pattern: ^/api/login
             stateless: true
             json_login:
-                check_path: /api/login_check # or api_login_check as defined in config/routes.yaml
+                check_path: /api/login_check
                 success_handler: lexik_jwt_authentication.handler.authentication_success
                 failure_handler: lexik_jwt_authentication.handler.authentication_failure
+
         api:
             pattern: ^/api
             stateless: true
-            guard:
-                authenticators:
-                    - lexik_jwt_authentication.jwt_token_authenticator
-
+            jwt: ~
+        
+        
         # api: // Old form of auth by header
         #     pattern: ^/api
         #     lazy: true
@@ -50,8 +50,10 @@ security:
     # Note: Only the *first* access control that matches will be used
     access_control:
         # - { path: ^/admin, roles: ROLE_ADMIN }
-        - { path: ^/api/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/api, roles: ROLE_USER }
+        - { path: ^/api/login, roles: PUBLIC_ACCESS }
+        - { path: ^/api,       roles: IS_AUTHENTICATED_FULLY }
+        # - { path: ^/api, roles: ROLE_USER }
+        # - { path: ^/api/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
 
 when@test:
     security:

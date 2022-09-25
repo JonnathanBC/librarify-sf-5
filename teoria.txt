@@ -113,6 +113,7 @@ Queda más limpio y no es necesario el uso del constructor si no como vemos pode
 
 
 !!! BASES DE DATOS !!!.- Symofny tiene un gestor de DB por execelencia vamos a llamarlo ORM llamado Doctrine, doctrine tiene como dis funciones :
+mysql -u library_usr -p
     1) Nos abstrae la conexión con la BD, es decir, nos trae una capa que nos permite conectarnos a BD sin tenernos que nososotros picar la típicas conslutas de mySQL
 
     2)Funciona como un ORM lo cual nos permite mapear nuestras clases y objetos php con las tablas que tenmos en MySql y funciona correctamente.
@@ -868,8 +869,9 @@ Luego siguiendo la documentacion podemos genersr esos usuarios. como en el ejemp
 src/DataFixtures/UserFixture.php
 
 Luego debemos de ejecutar esta fixture con el sig comando:
+    Pero debemosd de tenet cuidado porque esto lo que hace es limpiar el DB.
     - bin/console doctrine:fixtures:load
-    Pero debemosd de tenet cuidado porque esto lo que hace es limpiar el DB, para solucionar esto debemos de lanzar pero con un flag --append ejm:
+    Con esto lo solucionamos, debemos de lanzar pero con un flag --append ejm:
     - bin/console doctrine:fixtures:load --append
 
 Ahora si vamos a instalar el bundle para jwt que en este caso usaremos lexik
