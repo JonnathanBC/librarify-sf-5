@@ -24,6 +24,7 @@ services:
             $appApiToken: '%app.api_token%'
 
     App\Services\Utils\HttpClientInterface: '@App\Services\Utils\HttpClient'
+    App\Services\Utils\WriteCsvInterface: '@App\Services\Utils\WriteCsv'
 
     #Admin Entity
     admin.category:
@@ -65,5 +66,10 @@ services:
             - {
                 name: kernel.event_listener,
                 event: lexik_jwt_authentication.on_authentication_success,
-                method: onAuthenticationSuccess
+                method: onAuthenticationSuccess,
+                priority: -1000
             }
+
+    App\Services\Book\ExportInCsv:
+        arguments:
+            $projectFolder: '%kernel.project_dir%'

@@ -977,3 +977,31 @@ Pasos:
 
     4) Debemos de detener nuestros contenedores para poder ejecutarlo. Luego de detener lanzamos el sig comando:
         - docker-sync-stack start que lo que va a hacer es ejecutar docker sync y levanatr todo el stack que tenemos en docker compose y realizar la sincronizacíon por nosotros.
+
+
+!!! CSV !!!.- Vamos a generar un csv apartir de los libros que tenemos en DB. Podemos usar la funcion de php nativo fputcsv(), pero en este caso lo que haremos es ayudarnos de una librería externa llamada php csv league.
+    - Instalación: composer require league/csv
+En symfony siempre debemos como buena práctica cuando delegamos una funcionalidad a librerias de terceros generar nosotros mismos nuestro servicio que la encapsule por si en algún momento la queremos cambiar sería mas fácil hacerlo.
+
+    - USO:
+        - Declarar el interface dentro de App\Services\Utils\WriteCsvInterface.php con su lógica dentro.
+        - Luego crear la implementación del interface para usarla dentro de App\Services\Utils\WriteCsv.php con su lógica dentro como están los archivos.
+
+        - El sig paso sería configurar dicho servicio, recordsndo que siempre que nosotros declaramos declaramos un interface de este tipo debemos decirle el services.yaml quien implementa esa interface para que funcione cuando inyectamos la interface en vez del servicio completo ejm:
+        App\Services\Utils\WriteCsvInterface: '@App\Services\Utils\WriteCsv'
+
+        - Sig paso sería leer de la BD todos los libros que tenemos y escribir dicho cvs para porder enviar o usar como queramos. Entonces dentro de la carpeta services vamos a crear ahora nuestro servicio Dentro de la carpeta Book, llamado ExportInCsv.php con toda la lógica dentro.
+
+        - Ahora lo que vamos ha ha hacer es crear los comandos de symfony que nos permiten es crear comandos de consola que queramos. Dentro de src creamos una carpeta llamada Commands, y lo único que nos pide symfony de modo que el los pueda identificar es que extendamos de una clase abstracta llamada Command verificar el código en App\Command\ExportBooksInCsvCommand.php
+
+        - Y para ejecutar si todo ha ido bien debemos de lanzarlo con el sig comando:
+            bin/console app:books:export-in-csv este es el nombre que le dimos al comando dentro de la clase que creamos llamada ExportBooksInCsvCommand.php
+            o dentro de nuestra mismocontenedor podemos entrar en la carpeta var y ejecutar el comando con
+            cat books.csv
+
+NOTA.- Symfony nos permite a nosotros la inyeccion de dependencias entra clases, pero en un caso especifico en App\Services\Book\ExportInCsv en el constructor nosotros estamos inyectando un string lo que sería $projectFolder, pero symfony no entiende esto porque es un string para que esto funcione como un servico inyectado lo que debemos de hacer es dentro de services.yaml crear lo sig:
+
+    App\Services\Book\ExportInCsv:
+        arguments:
+            $projectFolder: '%kernel.project_dir%'
+Con esto le decimos en el servicio ExportInCsv.php te estoy pasando una variable o argumento llamado $projectFolder procesalo como una inyeccion de dependencia con el sig valor, en este caso es $projectFolder y lo único que quiero es darle como valor la raíz de mi proyecto.
