@@ -5,6 +5,11 @@
 api_login_check:
     path: /api/login_check
 
+# config/routes.yaml
+api_refresh_token:
+    path: /api/token/refresh
+
+
 api:
     resource: ../src/Controller/Api/
     type: annotation

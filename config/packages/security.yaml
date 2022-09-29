@@ -16,29 +16,17 @@ security:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
-        login:
-            pattern: ^/api/login
-            stateless: true
-            json_login:
-                check_path: /api/login_check
-                success_handler: lexik_jwt_authentication.handler.authentication_success
-                failure_handler: lexik_jwt_authentication.handler.authentication_failure
-
-        refresh:
-            pattern:  ^/api/token/refresh
-            stateless: true
-
         api:
             pattern: ^/api
             stateless: true
+            entry_point: jwt
+            json_login:
+                check_path: /api/login_check # or, if you have defined a route for your login path, the route name you used
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
             jwt: ~
-        
-        
-        # api: // Old form of auth by header
-        #     pattern: ^/api
-        #     lazy: true
-        #     custom_authenticators:
-        #         - App\Security\ApiKeyAuthenticator
+            refresh_jwt:
+                check_path: /api/token/refresh # or, you may use the `api_refresh_token` route name
         
         # main:
         #    lazy: true
@@ -55,10 +43,8 @@ security:
     access_control:
         # - { path: ^/admin, roles: ROLE_ADMIN }
         - { path: ^/api/login, roles: PUBLIC_ACCESS }
-        - { path: ^/api/token/refresh, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/api/(login|token/refresh), roles: PUBLIC_ACCESS }
         - { path: ^/api,       roles: IS_AUTHENTICATED_FULLY }
-        # - { path: ^/api, roles: ROLE_USER }
-        # - { path: ^/api/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
 
 when@test:
     security:

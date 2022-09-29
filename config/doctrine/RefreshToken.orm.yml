@@ -1,0 +1,5 @@
+App\Entity\RefreshToken:
+    type: entity
+    table: refresh_tokens
+    id: {  }
+    lifecycleCallbacks: {  }
