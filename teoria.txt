@@ -897,6 +897,64 @@ Configuración:
     api_login_check:
         path: /api/login_check
 Entonces esta se mandaria ahora por Bearer Token.
+Lexik nos permite trabajar con EventListener, es decir, declarar listener que escuchan diff eventos que va lanzando la libreri ay realizar diff modificaciones.
+
+Vamos a delcarar el eventListener dentro de el archivo services.yaml con lo sig al final:
+    App\EventListener\JWTCreatedListener:
+        arguments: ['@request_stack']
+        tags:
+            - {
+                name: kernel.event_listener,
+                event: lexik_jwt_authentication.on_jwt_created,
+                method: onJWTCreated
+            }
+
+- Luego debemos de crear la clase en la misma rita que especificamos en este caso App\EventListener\JWTCreatedListener con la lógica conrrespondiente.
+
+-Asi mismo podemos conparar la ip que en este caso le dimos de seguridad, podemos comprobar si la IP que le estamos mandando sea el mismo en dado caso si nos roban el jwt, asi mismo delcararremos otro eventListener que se encargue de esto por ejm:
+    - App\EventListener\JWTDecodedListener:
+        arguments: ['@request_stack']
+        tags:
+            - {
+                name: kernel.event_listener,
+                event: lexik_jwt_authentication.on_jwt_decoded,
+                method: onJWTDecoded
+            }
+    Y pues debemos de hacer el miso procedimiento de crear el archivo etc etc.
+
+También podemos modificar el formato que nos envía la respuesta despues del login check, lo podemos modificar tambien con un eventListener x ejm:
+
+App\EventListener\JWTAuthenticationSuccessListener:
+        arguments: ['@request_stack']
+        tags:
+            - {
+                name: kernel.event_listener,
+                event: lexik_jwt_authentication.on_authentication_success,
+                method: onAuthenticationSuccess
+            }
+
+También podemos refrescar nuestros token ya que tiene un tiempo de expiración, lo que debemos de hacer siempre es darle al cliente que consume nuestra api, es en el momento que la fecha de expiración se aproxime pueda enviranos otro token y asi refrescar con el nuevo sin necesidad de pedirle al usuario las credenciales que sería un rollo.
+Para esto vamos a usar una libreria de lexik mismo lo instalmos con el sig comando, aunque la unica pega de este bundle es que necesita necesariamente de la BD para generar los tokens a diff de lexik.
+    - composer require "gesdinet/jwt-refresh-token-bundle"
+
+- Una vex instalada lo que vamos h hacer es modificar un poco las rutas de nuestro componente de seguridad para tenet una ruta donde podamos refrescar nuestro token y obtener unno nuevo y podeamos acceder a ello. En el routes.yaml vamos a añadir lo sig:
+
+gesdinet_jwt_refresh_token:
+    path: /api/token/refresh
+    controller: gesdinet.jwtrefreshtoken::refresh
+
+- Luego en nuestro security.yaml debemos de añadir otro firewall llamado refresh importantisimo colocarlo antes del firewall de api importante, porque siempre ve de arriba abajo los firewall.
+NOTA.- Un firewall es quien monitoriza, filtra y bloquea el tráfico HTTP de una aplicación web
+
+refresh:
+    pattern:  ^/api/token/refresh
+    stateless: true
+    anonymous: true
+
+- Luego en el mismo security habilitamos el access control con lo sig, arribita del endpoint de api
+    - { path: ^/api/token/refresh, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+
+- Luego debemos de generar una migración contra BD 
 
 !!! DOCKER SYNC !!!.- Esto nos permite sincronizar nuestros archivos del proyecto de una forma más rápida cuando estamos desarrollando.
 Lo debemos instalar en nuestro ordenador con el sig comando:
