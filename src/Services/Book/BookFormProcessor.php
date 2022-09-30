@@ -19,36 +19,17 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class BookFormProcessor
 {
-    private BookRepository $bookRepository;
-    private FileUploader $fileUploader;
-    private FormFactoryInterface $formFactory;
-    private GetBook $getBook;
-    private GetCategory $getCategory;
-    private CreateCategory $createCategory;
-    private GetAuthor $getAuthor;
-    private CreateAuthor $createAuthor;
-    private EventDispatcherInterface $eventDispatcher;
-    
     public function __construct(
-        BookRepository $bookRepository,
-        FileUploader $fileUploader,
-        FormFactoryInterface $formFactory,
-        GetBook $getBook,
-        GetCategory $getCategory,
-        CreateCategory $createCategory,
-        GetAuthor $getAuthor,
-        CreateAuthor $createAuthor,
-        EventDispatcherInterface $eventDispatcher
+        private BookRepository $bookRepository,
+        private FileUploader $fileUploader,
+        private FormFactoryInterface $formFactory,
+        private GetBook $getBook,
+        private GetCategory $getCategory,
+        private CreateCategory $createCategory,
+        private GetAuthor $getAuthor,
+        private CreateAuthor $createAuthor,
+        private EventDispatcherInterface $eventDispatcher
     ) {
-        $this->bookRepository = $bookRepository;
-        $this->fileUploader = $fileUploader;
-        $this->formFactory = $formFactory;
-        $this->getBook = $getBook;
-        $this->getAuthor = $getAuthor;
-        $this->getCategory = $getCategory;
-        $this->createAuthor = $createAuthor;
-        $this->createCategory = $createCategory;
-        $this->eventDispatcher = $eventDispatcher;
     }
 
     public function __invoke(Request $request, ?string $bookId = null): array

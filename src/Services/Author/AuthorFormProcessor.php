@@ -11,18 +11,11 @@ use Symfony\Component\HttpFoundation\Request;
 
 class AuthorFormProcessor
 {
-    private GetAuthor $getAuthor;
-    private AuthorRepository $authorRepository;
-    private FormFactoryInterface $formFactoryInterface;
-
     public function __construct(
-        GetAuthor $getAuthor,
-        AuthorRepository $authorRepository,
-        FormFactoryInterface $formFactoryInterface
+        private GetAuthor $getAuthor,
+        private AuthorRepository $authorRepository,
+        private FormFactoryInterface $formFactoryInterface
     ) {
-        $this->getAuthor = $getAuthor;
-        $this->authorRepository = $authorRepository;
-        $this->formFactoryInterface = $formFactoryInterface;
     }
 
     public function __invoke(Request $request, ?string $authorId = null): array
@@ -47,9 +40,9 @@ class AuthorFormProcessor
         }
 
         if ($author === null) {
-            $author = Author::create($authorDto->getName());
+            $author = Author::create($authorDto->name);
         } else {
-            $author->update($authorDto->getName());
+            $author->update($authorDto->name);
         }
 
         $this->authorRepository->save($author);

@@ -1005,3 +1005,5 @@ NOTA.- Symfony nos permite a nosotros la inyeccion de dependencias entra clases,
         arguments:
             $projectFolder: '%kernel.project_dir%'
 Con esto le decimos en el servicio ExportInCsv.php te estoy pasando una variable o argumento llamado $projectFolder procesalo como una inyeccion de dependencia con el sig valor, en este caso es $projectFolder y lo único que quiero es darle como valor la raíz de mi proyecto.
+
+!!! PHP 8.1 DOCKER UPGRADE !!!.- Una vez que cambiamos dockerfile a la version de 8.1 debemos de lanzar docker compose up -d --build php ¿ para que se vuelva a conatruir la imagen con todos los cambios
