@@ -3,23 +3,25 @@
 namespace App\Services\Book;
 
 use App\Repository\BookRepository;
+use App\Services\FileDeleter;
 
 class DeleteBook
 {
-    private GetBook $getBook;
-    private BookRepository $bookRepository;
 
     public function __construct(
-        GetBook $getBook,
-        BookRepository $bookRepository
+        private GetBook $getBook,
+        private BookRepository $bookRepository,
+        private FileDeleter $fileDeleter
     ) {
-        $this->getBook = $getBook;
-        $this->bookRepository = $bookRepository;
     }
 
     public function __invoke(string $id)
     {
         $book = ($this->getBook)($id);
+        $image = $book->getImage();
+        if ($image !== null) {
+            ($this->fileDeleter)($image);
+        }
         $this->bookRepository->delete($book);
     }
 }

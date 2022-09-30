@@ -3,8 +3,12 @@
 namespace App\Repository;
 
 use App\Entity\Book;
+use App\Model\Book\BookRepositoryCriteria;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
+
+use function Symfony\Component\DependencyInjection\Loader\Configurator\iterator;
 
 /**
  * @extends ServiceEntityRepository<Book>
@@ -57,5 +61,35 @@ class BookRepository extends ServiceEntityRepository
     {
         $this->getEntityManager()->remove($book);
         $this->getEntityManager()->flush();
+    }
+
+    public function findByCriteria(BookRepositoryCriteria $criteria): array
+    {
+        $queryBuilder = $this->createQueryBuilder('b')
+            ->orderBy('b.title', 'DESC');
+
+        if ($criteria->authorId !== null) {
+            $queryBuilder
+                ->andWhere(':authorId MEMBER OF b.authors')
+                ->setParameter('authorId', $criteria->authorId);
+        }
+
+        if ($criteria->categoryId !== null) {
+            $queryBuilder
+                ->andWhere(':categoryId MEMBER OF b.categories')
+                ->setParameter('categoryId', $criteria->categoryId);
+        }
+
+        $queryBuilder->setMaxResults($criteria->itemsPerPage);
+        $queryBuilder->setFirstResult(($criteria->page -1) * $criteria->itemsPerPage);
+
+        // Devolucion como API Platform
+        $paginator = new Paginator($queryBuilder->getQuery());
+        return [
+            'total' => count($paginator),
+            'itemsPerPage' => $criteria->itemsPerPage,
+            'page' => $criteria->page,
+            'data' => iterator_to_array($paginator->getIterator())
+        ];
     }
 }

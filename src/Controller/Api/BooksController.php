@@ -2,6 +2,7 @@
 
 namespace App\Controller\Api;
 
+use App\Model\Book\BookRepositoryCriteria;
 use App\Repository\BookRepository;
 use App\Services\Book\BookFormProcessor;
 use App\Services\Book\DeleteBook;
@@ -18,9 +19,23 @@ class BooksController extends AbstractFOSRestController
 {
     #[Get(path: "/books")]
     #[ViewAttribute(serializerGroups: ['book'], serializerEnableMaxDepthChecks: true)]
-    public function getActions(BookRepository $bookRepository)
-    {
-        return $bookRepository->findAll();
+    public function getActions(
+        BookRepository $bookRepository,
+        Request $request
+    ) {
+        $authorId = $request->query->get('authorId');
+        $categoryId = $request->query->get('categoryId');
+        $itemsPerPage = $request->query->get('itemsPerPage');
+        $page = $request->query->get('page');
+
+        $criteria = new BookRepositoryCriteria(
+            $authorId,
+            $categoryId,
+            $itemsPerPage !== null ? intval($itemsPerPage) : 10,
+            $page !== null ? intval($page) : 1,
+        );
+
+        return $bookRepository->findByCriteria($criteria);
     }
 
     #[Get(path: "/books/{id}")]
@@ -31,7 +46,7 @@ class BooksController extends AbstractFOSRestController
     ) {
         try {
             $book = ($getBook)($id);
-        } catch (\Throwable $th) {
+        } catch (\Throwable) {
             return View::create('Book not found', Response::HTTP_BAD_REQUEST);
         }
         return $book;
@@ -74,12 +89,12 @@ class BooksController extends AbstractFOSRestController
             $statusCode = $book ? Response::HTTP_CREATED : Response::HTTP_BAD_REQUEST;
             $data = $book ?? $error;
             return View::create($data, $statusCode);
-        } catch (Throwable $e) {
+        } catch (Throwable) {
             return View::create('Book not found', Response::HTTP_BAD_REQUEST);
         }
     }
 
-    #[Delete(path: "/books")]
+    #[Delete(path: "/books/{id}")]
     #[ViewAttribute(serializerGroups: ['book'], serializerEnableMaxDepthChecks: true)]
     public function deleteAction(
         string $id,
@@ -87,7 +102,7 @@ class BooksController extends AbstractFOSRestController
     ) {
         try {
             ($deleteBook)($id);
-        } catch (Throwable $t){
+        } catch (Throwable){
             return View::create('Book not found', Response::HTTP_BAD_REQUEST);
         }
         return View::create('Book deleted', Response::HTTP_NO_CONTENT);
