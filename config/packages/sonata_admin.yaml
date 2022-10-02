@@ -1,8 +1,23 @@
 sonata_admin:
-    title: 'Sonata Admin'
+    title: 'Librarify Admin'
+    # title_logo = 'librarify.png'
     dashboard:
         blocks:
             - { type: sonata.admin.block.admin_list, position: left }
+        groups:
+            admin:
+                label: Admin
+                icon: <i class='fa fa-pencil'></i>
+            cache:
+                label: Settings
+                icon: <i class='fa fa-gears'></i>
+                items: 
+                    - route: admin_cache_clear
+                      label: Clear cache
+    global_search:
+        empty_boxes: hide #fade
+        admin_route: edit
+
 
 sonata_block:
     blocks:

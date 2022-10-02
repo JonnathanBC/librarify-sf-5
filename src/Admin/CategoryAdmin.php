@@ -9,6 +9,7 @@ use Sonata\AdminBundle\Admin\AbstractAdmin;
 use Sonata\AdminBundle\Datagrid\DatagridMapper;
 use Sonata\AdminBundle\Datagrid\ListMapper;
 use Sonata\AdminBundle\Form\FormMapper;
+use Sonata\AdminBundle\Route\RouteCollectionInterface;
 use Sonata\AdminBundle\Show\ShowMapper;
 
 final class CategoryAdmin extends AbstractAdmin
@@ -16,6 +17,25 @@ final class CategoryAdmin extends AbstractAdmin
     public function createNewInstance(): object
     {
         return Category::create('');
+    }
+
+    // Route to clone and import
+    protected function configureRoutes(RouteCollectionInterface $collection): void
+    {
+        $collection
+            ->add('clone', $this->getRouterIdParameter() . '/clone')
+            ->add('import');
+    }
+
+    // Button import
+    protected function configureActionButtons(
+        array $buttonList,
+        string $action,
+        ?object $object = null
+    ): array
+    {
+        $buttonList['import'] = ['template' => 'admin/category/list__action_import.html.twig'];
+        return $buttonList;    
     }
 
     protected function configureDatagridFilters(DatagridMapper $filter): void
@@ -38,6 +58,9 @@ final class CategoryAdmin extends AbstractAdmin
                     'show' => [],
                     'edit' => [],
                     'delete' => [],
+                    'clone' => [
+                        'template' => 'admin/category/list__action_clone.html.twig'
+                    ],
                 ],
             ]);
     }

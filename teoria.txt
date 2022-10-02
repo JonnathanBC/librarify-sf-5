@@ -1007,3 +1007,25 @@ NOTA.- Symfony nos permite a nosotros la inyeccion de dependencias entra clases,
 Con esto le decimos en el servicio ExportInCsv.php te estoy pasando una variable o argumento llamado $projectFolder procesalo como una inyeccion de dependencia con el sig valor, en este caso es $projectFolder y lo único que quiero es darle como valor la raíz de mi proyecto.
 
 !!! PHP 8.1 DOCKER UPGRADE !!!.- Una vez que cambiamos dockerfile a la version de 8.1 debemos de lanzar docker compose up -d --build php ¿ para que se vuelva a conatruir la imagen con todos los cambios
+
+NOTE.- Si queremo nosotros instalarunpquete con composer y requerimos una version exacta podemos en el mismo comando lanzar lo sig:
+    - composer require name-paq:"version"
+    - composer require sonata-project/admin-bundle:"4.8.*"
+
+- Cuando nosotros queremos usar un controlador como servicios debemos nosotros de registrar el controlador como iun servicio para poder administrar en este caso au los adminitradores, eso lo podemos hacer con los siguiente pasos:
+    - En services.yaml tenemos ya declarado nuetsros administradores como admin.category etc, en el que vamos a hacer el controlador debemos de registrarlo en este caso nosotros vamos a regstrarlo dentro de admin.category ejm:
+         admin.category:
+        class: App\Admin\CategoryAdmin
+        tags:
+            - {
+                name: sonata.admin,
+                model_class: App\Entity\Category,
+                controller: ~,
+                manager_type: orm,
+                group: Administrador,
+                label: Category
+            } aqui vemos que tenemos el controller: ~ asi entonces aqui es donde debemos de nosotros regustralo colocando el namespace del controlador ejm:
+            controller: App\Controller\Admin\CategoryAdminController
+Porque como ejem vamos nosotros a crear una accion de clonar un libro y hacer que sonata admin ejecute ese clonado mediante un botón.
+
+        
