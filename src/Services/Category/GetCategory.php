@@ -12,7 +12,6 @@ class GetCategory
     public function __construct(
         private CategoryRepository $categoryRepository
     ) {
-        $this->categoryRepository = $categoryRepository;
     }
 
     public function __invoke(string $id): ?Category

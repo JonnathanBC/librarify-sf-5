@@ -7,11 +7,9 @@ use Symfony\Component\HttpFoundation\RequestStack;
 
 class JWTDecodedListener
 {
-    private RequestStack $requestStack;
-
-    public function __construct(RequestStack $requestStack)
-    {
-        $this->requestStack = $requestStack;
+    public function __construct(
+        private RequestStack $requestStack
+    ) {
     }
 
     public function onJWTDecoded(JWTDecodedEvent $event)

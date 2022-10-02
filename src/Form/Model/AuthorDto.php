@@ -15,7 +15,10 @@ class AuthorDto {
 
     public static function createFromAuthor(Author $author): self
     {
-        return new self($author->getId(), $author->getName());
+        return new self(
+            $author->getId(),
+            $author->getName()
+        );
     }
 
 }

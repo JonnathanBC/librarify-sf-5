@@ -16,10 +16,6 @@ use Throwable;
 
 class AuthorController extends AbstractFOSRestController
 {
-    /**
-     * @Rest\Get(path="/authors")
-     * @Rest\View(serializerGroups={"author"}, serializerEnableMaxDepthChecks=true)
-     */
     #[Get(path: "/authors")]
     #[ViewAttribute(serializerGroups: ["author"], serializerEnableMaxDepthChecks: true)]
     public function getActions(AuthorRepository $authorRepository)

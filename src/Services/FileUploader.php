@@ -6,11 +6,9 @@ use League\Flysystem\FilesystemOperator;
 
 class FileUploader 
 {
-    private $defaultStorage;
-
-    public function __construct(FilesystemOperator $defaultStorage)
-    {
-        $this->defaultStorage = $defaultStorage;
+    public function __construct(
+        private FilesystemOperator $defaultStorage
+    ) {
     }
 
     public function uploadBase64File(string $base64File): string

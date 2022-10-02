@@ -6,15 +6,18 @@ use App\Entity\Category;
 use Ramsey\Uuid\UuidInterface;
 
 class CategoryDto {
-    public ?UuidInterface $id = null;
-    public ?string $name = null;
+    public function __construct(
+        public ?UuidInterface $id = null,
+        public ?string $name = null
+    ) {
+    }
 
     public static function createFromCategory(Category $category): self
     {
-        $dto = new self();
-        $dto->id = $category->getId();
-        $dto->name = $category->getName();
-        return $dto;
+        return new self(
+            $category->getId(),
+            $category->getName()
+        );
     }
 
     public function getId(): ?UuidInterface

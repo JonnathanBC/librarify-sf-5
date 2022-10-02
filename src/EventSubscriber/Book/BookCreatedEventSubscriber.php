@@ -9,15 +9,10 @@ use Psr\Log\LoggerInterface;
 
 class BookCreatedEventSubscriber implements EventSubscriberInterface
 {
-    private GetBook $getBook;
-    private LoggerInterface $logger;
-
     public function __construct(
-        GetBook $getBook,
-        LoggerInterface $logger
+        private GetBook $getBook,
+        private LoggerInterface $logger
     ) {
-        $this->getBook = $getBook;
-        $this->logger = $logger;
     }
 
     public static function getSubscribedEvents()

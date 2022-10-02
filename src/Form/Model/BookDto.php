@@ -7,19 +7,17 @@ use DateTimeInterface;
 
 class BookDto
 {
-    public ?string $title = null;
-    public ?string $base64Image = null;
-    public ?string $description = null;
-    public ?int $score = null;
-    public ?DateTimeInterface $readAt = null;
-    /** @var \App\Form\Model\CategoryDto[]|null */
-    public ?array $categories = [];
-    /** @var \App\Form\Model\AuthorDto[]|null */
-    public ?array $authors = [];
-
-    public function __construct()
-    {
-        $this->categories = [];
+    public function __construct(
+        public ?string $title = null,
+        public ?string $base64Image = null,
+        public ?string $description = null,
+        public ?int $score = null,
+        public ?DateTimeInterface $readAt = null,
+        /** @var \App\Form\Model\CategoryDto[]|null */
+        public ?array $categories = [],
+        /** @var \App\Form\Model\AuthorDto[]|null */
+        public ?array $authors = [],
+    ) {
     }
 
     public static function createEmpty(): self
@@ -29,11 +27,11 @@ class BookDto
 
     public static function createFromBook(Book $book): self
     {
-        $dto = new self();
-        $dto->title = $book->getTitle();
-        $dto->score = $book->getScore()->getValue();
-        $dto->description = $book->getDescription();
-        $dto->readAt = $book->getReadAt();
-        return $dto;
+        return new self(
+            $book->getTitle(),
+            $book->getScore(),
+            $book->getDescription(),
+            $book->getReadAt()
+        );
     }
 }

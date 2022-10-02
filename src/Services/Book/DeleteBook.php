@@ -7,7 +7,6 @@ use App\Services\FileDeleter;
 
 class DeleteBook
 {
-
     public function __construct(
         private GetBook $getBook,
         private BookRepository $bookRepository,
