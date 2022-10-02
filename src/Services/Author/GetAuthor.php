@@ -9,11 +9,9 @@ use Ramsey\Uuid\Uuid;
 
 class GetAuthor
 {
-    private AuthorRepository $authorRepository;
-
-    public function __construct(AuthorRepository $authorRepository)
-    {
-        $this->authorRepository = $authorRepository;
+    public function __construct(
+        private AuthorRepository $authorRepository
+    ) {
     }
 
     public function __invoke(string $id): ?Author

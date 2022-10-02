@@ -11,19 +11,11 @@ use Symfony\Component\HttpFoundation\Request;
 
 class CategoryFormProcessor 
 {
-
-    private GetCategory $getCategory;
-    private FormFactoryInterface $formFactoryInterface;
-    private CategoryRepository $categoryRepository;
-
     public function __construct(
-        GetCategory $getCategory,
-        FormFactoryInterface $formFactoryInterface,
-        CategoryRepository $categoryRepository
+        private GetCategory $getCategory,
+        private FormFactoryInterface $formFactoryInterface,
+        private CategoryRepository $categoryRepository
     ) {
-        $this->getCategory = $getCategory;
-        $this->formFactoryInterface = $formFactoryInterface;
-        $this->categoryRepository = $categoryRepository;
     }
 
     public function __invoke(Request $request, ?string $categoryId = null): array

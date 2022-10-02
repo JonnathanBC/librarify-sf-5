@@ -9,10 +9,9 @@ use Ramsey\Uuid\Uuid;
 
 class GetBook
 {
-    private BookRepository $bookRepository;
-
-    public function __construct(BookRepository $bookRepository) {
-        $this->bookRepository = $bookRepository;
+    public function __construct(
+        private BookRepository $bookRepository
+    ) {
     }
 
     public function __invoke(string $id): ?Book

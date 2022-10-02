@@ -9,11 +9,9 @@ use Exception;
 
 class GetBookByIsbn
 {
-    private HttpClientInterface $httpClient;
-
-    public function __construct(HttpClientInterface $httpClient)
-    {
-        $this->httpClient = $httpClient;    
+    public function __construct(
+        private HttpClientInterface $httpClient
+    ) {
     }
 
     public function __invoke(string $isbn): GetBookByIsbnResponse
